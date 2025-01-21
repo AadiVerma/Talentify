@@ -17,7 +17,7 @@ function App() {
           <Route path="accepted-req" element={<AcceptedRequest />} />
           <Route path="pending-req" element={<PendingRequest />} />
         </Route>
-        <Route path="/" element={<TalentPage />} /> {/* Default Route */}
+        <Route path="/talent-page" element={<TalentPage />} /> {/* Default Route */}
         <Route path="/talents" element={<TalentPage />} /> {/* Specific Route */}
         <Route path="/register-talent" element={<RegisterTalent />} />
       </Routes>

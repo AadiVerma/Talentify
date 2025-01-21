@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Briefcase, Menu } from "lucide-react";
+import {
+  Search,
+  Briefcase,
+  Menu,
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  Star,
+  ExternalLink,
+} from "lucide-react";
 
-function TalentPage() {
+const TalentPage = () => {
   const [talents, setTalents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedTalent, setSelectedTalent] = useState(null);
 
   useEffect(() => {
-    // Simulating API call
-    const mockTalents = [
-      {
-        id: 1,
-        name: "Shivam Sharma",
-        skills: ["Developer", "UI/UX"],
-        description: "Full-stack developer with 5 years of experience",
-        photo: "",
-      },
-      // Add more mock data as needed
-    ];
-    setTalents(mockTalents);
+    const fetchTalents = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/talents");
+        const data = await response.json();
+        setTalents(data);
+      } catch (error) {
+        console.error("Error fetching talents:", error);
+      }
+    };
+
+    fetchTalents();
   }, []);
 
   const filteredTalents = Array.isArray(talents)
@@ -28,196 +38,369 @@ function TalentPage() {
         const nameMatch = talent.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
-        const skillMatch = talent.skills
+        const skillMatch = Array.isArray(talent.skills)
           ? talent.skills.some((skill) =>
               skill.toLowerCase().includes(searchQuery.toLowerCase())
             )
           : false;
         const filterMatch =
-          !filter || talent.skills?.some((skill) => skill === filter);
-
+          !filter ||
+          (Array.isArray(talent.skills) && talent.skills.includes(filter));
         return (nameMatch || skillMatch) && filterMatch;
       })
     : [];
 
   const handleHire = (talentId) => {
-    // Simulate hire request
     alert("Hire request sent!");
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50 ss4">
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-2xl font-bold text-purple-900">Talentify</h1>
+          <div className="flex justify-between h-20 items-center">
+            <div className="flex items-center gap-2">
+              <Star className="text-purple-600 w-8 h-8" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
+                Talentify
+              </h1>
+            </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-8 items-center">
+            <div className="hidden md:flex items-center gap-8">
               <Link
                 to="/"
-                className="text-gray-900 hover:text-purple-800 font-medium"
+                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
                 Home
               </Link>
               <Link
-                to="/login"
-                className="text-gray-900 hover:text-purple-800 font-medium"
+                to="/about"
+                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
-                Login
+                About
               </Link>
               <Link
                 to="/register-talent"
-                className="bg-purple-900 text-white px-4 py-2 rounded-md hover:bg-purple-800 transition-colors duration-300"
+                className="bg-purple-600 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
               >
-                Get Hired
+                Join as Talent
               </Link>
-              <div className="relative">
-                <Link to="/profile">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 hover:border-purple-500 transition">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-6 h-6 text-gray-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+              <Link to="/profile" className="group">
+                <div className="w-11 h-11 rounded-full bg-purple-50 flex items-center justify-center border-2 border-purple-100 group-hover:border-purple-300 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6 text-purple-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12zm0 2.25c-3 0-9 1.5-9 4.5V21h18v-2.25c0-3-6-4.5-9-4.5z"
-                      />
-                    </svg>
-                  </div>
-                </Link>
-              </div>
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+              </Link>
             </div>
 
-            {/* Mobile menu button */}
             <button
-              className="md:hidden rounded-md p-2 text-gray-900 hover:bg-purple-100"
+              className="md:hidden p-2 text-gray-500 hover:bg-purple-50 rounded-lg"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <Menu size={24} />
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
-            <div className="pt-2 pb-3 space-y-1">
+          <div className="md:hidden border-t border-gray-100 bg-white shadow-lg">
+            <div className="space-y-2 py-3">
               <Link
                 to="/"
-                className="block px-4 py-2 text-gray-900 hover:bg-purple-50"
+                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
               >
                 Home
               </Link>
               <Link
-                to="/login"
-                className="block px-4 py-2 text-gray-900 hover:bg-purple-50"
+                to="/about"
+                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
               >
-                Login
+                About
               </Link>
               <Link
                 to="/profile"
-                className="block px-4 py-2 text-gray-900 hover:bg-purple-50"
+                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
               >
                 Profile
               </Link>
-              <Link
-                to="/register-talent"
-                className="block px-4 py-2 text-gray-900 hover:bg-purple-50"
-              >
-                Join as Talent
-              </Link>
+              <div className="px-4 pt-2">
+                <Link
+                  to="/register-talent"
+                  className="block w-full text-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Join as Talent
+                </Link>
+              </div>
             </div>
           </div>
         )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Find Top Talent
-          </h2>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-grow relative">
-              <input
-                type="text"
-                placeholder="Search by name or skill"
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <Search
-                className="absolute left-3 top-3.5 text-gray-400"
-                size={20}
-              />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Search and Filter Section */}
+        <div
+          className={`transition-all duration-300 ${
+            selectedTalent ? "lg:pr-[33.333333%]" : ""
+          }`}
+        >
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Discover Top Talent
+            </h2>
+            <p className="text-gray-600 text-lg mb-8">
+              Connect with skilled professionals ready to bring value to your
+              projects
+            </p>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-grow relative">
+                <input
+                  type="text"
+                  placeholder="Search by name, skill, or expertise..."
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm"
+                />
+                <Search
+                  className="absolute left-4 top-4 text-gray-400"
+                  size={20}
+                />
+              </div>
+              <select
+                onChange={(e) => setFilter(e.target.value)}
+                className="md:w-48 py-4 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm"
+              >
+                <option value="">All Skills</option>
+                <option value="Developer">Developer</option>
+                <option value="Designer">Designer</option>
+                <option value="Manager">Manager</option>
+              </select>
             </div>
-            <select
-              onChange={(e) => setFilter(e.target.value)}
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value="">All Skills</option>
-              <option value="Developer">Developer</option>
-              <option value="Designer">Designer</option>
-              <option value="Manager">Manager</option>
-            </select>
           </div>
         </div>
 
-        {/* Talent Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTalents.length > 0 ? (
-            filteredTalents.map((talent) => (
-              <div
-                key={talent.id}
-                className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300"
+        {/* Main Content Area with Side Panel */}
+        <div className="relative flex">
+          {/* Talent Grid */}
+          <div className={`w-full ${selectedTalent ? "lg:w-2/3" : "w-full"}`}>
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 ${
+                selectedTalent ? "lg:grid-cols-2" : "lg:grid-cols-3"
+              } gap-6`}
+            >
+              {filteredTalents.length > 0 ? (
+                filteredTalents.map((talent) => (
+                  <div
+                    key={talent.id || talent.name}
+                    className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer h-[28rem]"
+                    onClick={() => setSelectedTalent(talent)}
+                  >
+                    <div className="p-6 h-full flex flex-col">
+                      <div className="relative mb-4">
+                        <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-purple-50 group-hover:border-purple-100 transition-colors">
+                          <img
+                            src={talent.photo || "/api/placeholder/96/96"}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute bottom-0 right-1/3 w-5 h-5 bg-green-400 border-3 border-white rounded-full"></div>
+                      </div>
+
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                          {talent.name}
+                        </h3>
+                        <p className="text-purple-600 font-medium">
+                          {talent.skills}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 justify-center mb-2">
+                        {Array.isArray(talent.skills) &&
+                          talent.skills.slice(0, 3).map((skill, index) => (
+                            <span
+                              key={`${skill}-${index}`}
+                              className="px-3 py-1.5 bg-purple-50 text-purple-600 text-sm font-medium rounded-lg"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        {Array.isArray(talent.skills) &&
+                          talent.skills.length > 3 && (
+                            <span className="px-3 py-1.5 bg-gray-50 text-gray-600 text-sm font-medium rounded-lg">
+                              +{talent.skills.length - 3}
+                            </span>
+                          )}
+                      </div>
+
+                      <p className="text-gray-600 text-center mb-2 overflow-hidden text-ellipsis line-clamp-2 flex-grow">
+                        {talent.description}
+                      </p>
+
+                      <button
+                        className="w-full flex items-center justify-center gap-1 bg-purple-600 text-white py-3.5 px-2 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleHire(talent.id);
+                        }}
+                      >
+                        <Briefcase size={18} />
+                        <span className="font-medium">Hire Me</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
+                  <div className="bg-purple-50 rounded-full p-4 mb-4">
+                    <Search size={32} className="text-purple-600" />
+                  </div>
+                  <p className="text-gray-600 text-lg text-center">
+                    No talents match your search criteria.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Side Panel */}
+          {selectedTalent && (
+            <div className="hidden lg:block fixed right-0 top-20 w-1/3 bg-white border-l border-gray-100 shadow-lg h-[calc(100vh-5rem)] overflow-y-auto p-8">
+              <button
+                onClick={() => setSelectedTalent(null)}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-50 rounded-lg transition-colors"
               >
-                <div className="p-6">
+                <X size={20} className="text-gray-400" />
+              </button>
+
+              <div className="text-center mb-8">
+                <div className="w-36 h-36 mx-auto rounded-full overflow-hidden border-4 border-purple-50 mb-6">
                   <img
-                    src={talent.photo}
-                    alt={`${talent.name}'s profile`}
-                    className="w-24 h-24 mx-auto rounded-full object-cover mb-4 border-2 border-purple-100"
+                    src={selectedTalent.photo || "/api/placeholder/144/144"}
+                    className="w-full h-full object-cover"
                   />
-                  <h3 className="text-xl font-semibold text-gray-900 text-center">
-                    {talent.name}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 justify-center mt-3 mb-4">
-                    {talent.skills.map((skill, index) => (
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {selectedTalent.name}
+                </h2>
+                <p className="text-purple-600 font-medium">
+                  {selectedTalent.title || "Professional"}
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
+                  <MapPin size={18} className="text-purple-600" />
+                  <span>{selectedTalent.location || "Remote"}</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
+                  <Mail size={18} className="text-purple-600" />
+                  <span>{selectedTalent.email || "contact@example.com"}</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
+                  <Phone size={18} className="text-purple-600" />
+                  <span>{selectedTalent.phone || "+1 234 567 890"}</span>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Skills & Expertise
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(selectedTalent.skills) &&
+                    selectedTalent.skills.map((skill, index) => (
                       <span
-                        key={index}
-                        className="px-3 py-1 bg-purple-50 text-purple-800 text-sm rounded-full"
+                        key={`${skill}-${index}`}
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 text-sm font-medium rounded-lg"
                       >
                         {skill}
                       </span>
                     ))}
-                  </div>
-                  <p className="text-gray-600 text-center mb-6">
-                    {talent.description}
-                  </p>
-                  <button
-                    className="w-full flex items-center justify-center gap-2 bg-purple-900 text-white py-3 px-4 rounded-lg hover:bg-purple-800 transition-colors duration-300"
-                    onClick={() => handleHire(talent.id)}
-                  >
-                    <Briefcase size={18} />
-                    <span>Hire Me</span>
-                  </button>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No talents available.</p>
             </div>
           )}
         </div>
       </main>
+
+      <footer className="bg-white border-t border-gray-100 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="text-purple-600 w-6 h-6" />
+                <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
+                  Talentify
+                </h3>
+              </div>
+              <p className="text-gray-600">
+                Connecting exceptional talent with innovative opportunities.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Quick Links</h4>
+              <div className="space-y-3">
+                <Link
+                  to="/about"
+                  className="block text-gray-600 hover:text-purple-600 transition-colors"
+                >
+                  About Us
+                </Link>
+                <Link
+                  to="/how-it-works"
+                  className="block text-gray-600 hover:text-purple-600 transition-colors"
+                >
+                  How It Works
+                </Link>
+                <Link
+                  to="/success-stories"
+                  className="block text-gray-600 hover:text-purple-600 transition-colors"
+                >
+                  Success Stories
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Contact</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Mail size={16} />
+                  <span>support@talentify.com</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Phone size={16} />
+                  <span>+1 (555) 123-4567</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 mt-12 pt-8 text-center text-gray-600">
+            <p>
+              &copy; {new Date().getFullYear()} Talentify. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-}
+};
 
 export default TalentPage;
