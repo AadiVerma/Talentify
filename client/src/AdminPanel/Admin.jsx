@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router-dom";
-
+import DashBoard from "./pages/DashBoard";
 function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
