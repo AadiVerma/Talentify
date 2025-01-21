@@ -140,26 +140,45 @@ function RegisterTalent() {
     firstName: "",
     lastName: "",
     email: "",
-    skills: [], // Skills will be stored as an array
+    skills: [],
     experience: "",
     description: "",
+    approve: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.skills.length ||
+      !formData.experience ||
+      !formData.description
+    ) {
+      console.error("All fields are required");
+      return;
+    }
     setIsSubmitting(true);
     try {
+      console.log("Sending data:", {
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email,
+        skills: formData.skills,
+        experience: Number(formData.experience),
+        description: formData.description,
+      });
       const response = await axios.post(
         "http://localhost:5000/api/v1/register-talent",
         {
-          firstname: formData.firstName,
-          lastname: formData.lastName,
+          firstname: formData.firstName, 
+          lastname: formData.lastName, 
           email: formData.email,
           skills: formData.skills,
-          experience: formData.experience,
+          experience: Number(formData.experience), 
           description: formData.description,
-          User: "userId", 
         }
       );
       setTimeout(() => navigate("/talent-page"), 1000);
@@ -170,7 +189,6 @@ function RegisterTalent() {
     }
   };
 
-  // Function to handle skill selection
   const handleSkillSelect = (skill) => {
     if (!formData.skills.includes(skill)) {
       setFormData((prevState) => ({
@@ -182,7 +200,6 @@ function RegisterTalent() {
     setShowSkillsDropdown(false);
   };
 
-  // Function to handle skill removal
   const handleSkillRemove = (skill) => {
     setFormData((prevState) => ({
       ...prevState,

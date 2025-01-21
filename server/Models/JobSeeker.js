@@ -24,6 +24,10 @@ const jobSeekerSchema = mongoose.Schema({
         type:Number,
         required:true
     },
+    approve : {
+        type : Boolean,
+        default : false,
+    }
     // User:{
     //     type:mongoose.Schema.Types.ObjectId,
     //     ref:'User',
