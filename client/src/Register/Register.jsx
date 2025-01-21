@@ -29,7 +29,7 @@ const AuthPage = () => {
 
       if (token) {
         // Store token in localStorage
-        localStorage.setItem('authToken', token);
+        localStorage.setItem('jwt', token);
         alert(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
         navigate('/');
       }

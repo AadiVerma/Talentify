@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Briefcase,
@@ -10,20 +11,31 @@ import {
   MapPin,
   Star,
 } from "lucide-react";
-
+function isAdmin() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role === "admin";
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
 const TalentPage = () => {
   const [talents, setTalents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
+    if (isAdmin()) {
+      navigate("/");
+    }
     const fetchTalents = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/v1/get-talents"
-        );
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/get-talents`);
         const data = await response.json();
         setTalents(data);
       } catch (error) {
@@ -164,9 +176,8 @@ const TalentPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Search and Filter Section */}
         <div
-          className={`transition-all duration-300 ${
-            selectedTalent ? "lg:pr-[33.333333%]" : ""
-          }`}
+          className={`transition-all duration-300 ${selectedTalent ? "lg:pr-[33.333333%]" : ""
+            }`}
         >
           <div className="mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">

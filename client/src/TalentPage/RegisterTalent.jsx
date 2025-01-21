@@ -1,8 +1,18 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
+function isAdmin() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role === "admin";
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
 function RegisterTalent() {
   const navigate = useNavigate();
   const availableSkills = [
@@ -136,6 +146,11 @@ function RegisterTalent() {
 
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
   const [searchSkill, setSearchSkill] = useState("");
+  useEffect(() => {
+    if (isAdmin()) {
+      navigate("/");
+    }
+  },[])
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -170,8 +185,10 @@ function RegisterTalent() {
         experience: Number(formData.experience),
         description: formData.description,
       });
+      console.log(import.meta.env.VITE_BASE_URL); 
+      // console.log(formDataToSend);
       const response = await axios.post(
-        "http://localhost:5000/api/v1/register-talent",
+        `${import.meta.env.VITE_BASE_URL}/api/v1/register-talent`,
         {
           firstname: formData.firstName, 
           lastname: formData.lastName, 
@@ -181,7 +198,7 @@ function RegisterTalent() {
           description: formData.description,
         }
       );
-      setTimeout(() => navigate("/talent-page"), 1000);
+      // setTimeout(() => navigate("/talent-page"), 1000);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

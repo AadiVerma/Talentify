@@ -1,20 +1,7 @@
-import React, { useState } from "react";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { Bell, Users, Briefcase, Building2, TrendingUp } from "lucide-react";
-
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { Bell, Users, Briefcase, Building2, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 const hiringTrends = [
   { month: "Jan", requests: 65, hires: 45 },
   { month: "Feb", requests: 85, hires: 55 },
@@ -61,15 +48,28 @@ const hiringRequests = [
     date: "2025-01-10",
   },
 ];
-
+function isAdmin() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role === "admin";
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
 const Dashboard = () => {
-  const [selectedStatus, setSelectedStatus] = useState("all");
-
-  const filteredRequests =
-    selectedStatus === "all"
-      ? hiringRequests
-      : hiringRequests.filter((req) => req.status === selectedStatus);
-
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const navigate = useNavigate();
+  const filteredRequests = selectedStatus === 'all' 
+    ? hiringRequests 
+    : hiringRequests.filter(req => req.status === selectedStatus);
+  useEffect(()=>{
+    if(!isAdmin()){
+      navigate('/');
+    }
+  },[])
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header */}

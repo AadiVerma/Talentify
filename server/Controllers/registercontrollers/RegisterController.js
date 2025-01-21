@@ -4,7 +4,7 @@ import JobSeeker from "../../Models/JobSeeker.js";
 const RegisterController = async (req, res) => {
   const { firstname, lastname, description, email, skills, experience } =
     req.body;
-
+  console.log(req.body);
   try {
     const finduser = await User.findOne({ email: email });
     // if (!finduser) {

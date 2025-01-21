@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 const ClientRequestCard = ({ request, onAccept, onReject, onClick, isActive }) => (
   <div
     onClick={onClick}
@@ -119,14 +120,27 @@ const DetailPanel = ({ request, onClose }) => (
     </div>
   </div>
 );
-
+function isAdmin() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role === "admin";
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
 const ClientRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
+    if(!isAdmin()){
+      navigate('/');
+    }
     const fetchRequests = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/v1/get-non-talents");

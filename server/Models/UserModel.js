@@ -25,6 +25,7 @@ const Schema = mongoose.Schema({
         required:false,
         default:"hirer",
         enum:['job-seeker','admin','hirer'],
+        default:'job-seeker'
     },
     jobseeker:{
         type:mongoose.Schema.Types.ObjectId,
@@ -34,7 +35,7 @@ const Schema = mongoose.Schema({
     status:{
         type:String,
         required:false,
-        default:"rejected",
+        default:"pending",
         enum:['rejected','hired','pending']
     }
 })
