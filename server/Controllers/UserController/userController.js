@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../../Models/UserModel.js"; // Adjust the path to your User model
 console.log(process.env.JWT_SECRET)
-const generateToken = (userId,role) => {
-  return jwt.sign({ userId ,role}, process.env.JWT_SECRET, {
+const generateToken = (userId,role,username) => {
+  return jwt.sign({ userId ,role,username}, process.env.JWT_SECRET, {
     expiresIn: "7d", // Token expires in 7 days
   });
 };
@@ -35,7 +35,7 @@ const generateToken = (userId,role) => {
 
     await newUser.save();
 
-    const token = generateToken(newUser._id,newUser.role);
+    const token = generateToken(newUser._id,newUser.role,newUser.username);
 
     res.status(201).json({
       _id: newUser._id,
@@ -67,7 +67,7 @@ const generateToken = (userId,role) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    const token = generateToken(user._id,user.role);
+    const token = generateToken(user._id,user.role,user.username);
 
     res.status(200).json({
       _id: user._id,

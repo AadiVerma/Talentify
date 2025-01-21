@@ -4,11 +4,10 @@ import SearchBar from '../Search/Search';
 import Component1 from './Components/Component1';
 import Component2 from './Components/Component2';
 import Component3 from './Components/Component3';
-
 export default function Page1() {
     return (
         <div className='ss4 bg-gray-100/30'>
-            <Nav homelink={""} aboutlink={""} explorelink={"talent-page"} registerlink={"register-talent"} contactlink={""} />
+            <Nav homelink={"/"} aboutlink={"#about"} explorelink={"talent-page"} registerlink={"register-talent"} contactlink={"#contact"} />
             <h1 className="text-4xl md:text-6xl flex justify-center ss4-dark mt-6">Discover the world's</h1>
             <h2 className="text-4xl md:text-6xl flex justify-center ss4-dark">Top Talent</h2>
 

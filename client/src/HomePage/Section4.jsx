@@ -13,7 +13,7 @@ export default function Section4() {
     };
 
     return (
-        <div className="relative flex flex-col items-center p-8 ss4 bg-cover bg-center bg-black/5 rounded-3xl m-10" >
+        <div id="contact" className="relative flex flex-col items-center p-8 ss4 bg-cover bg-center bg-black/5 rounded-3xl m-10" >
         <h1 className="text-5xl font-bold">Contact Our Team</h1>
             <h2 className="mt-4 text-gray-500 flex w-[60%] text-center">
                 Have questions about Talentify or need help getting started? Our team is here to assist you. Whether you're looking to showcase your skills or hire the best talent, we’re ready to support you every step of the way.

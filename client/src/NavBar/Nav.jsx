@@ -13,7 +13,7 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
             try {
                 const userData = JSON.parse(atob(token.split(".")[1]));
                 setUser({
-                    name: userData.name || "User",
+                    name: userData.username || "User",
                     profilePic: userData.profilePic || image,
                 });
             } catch (error) {
@@ -49,24 +49,24 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
                             >
                                 Explore
                             </Link>
-                            <Link
-                                to={`/${aboutlink}`}
+                            <a
+                                href={`/${aboutlink}`}
                                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
                             >
                                 About
-                            </Link>
+                            </a>
                             <Link
                                 to={`/${registerlink}`}
                                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
                             >
                                 Register
                             </Link>
-                            <Link
-                                to={`/${contactlink}`}
+                            <a
+                                href={`/${contactlink}`}
                                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
                             >
                                 Contact
-                            </Link>
+                            </a>
                         </div>
 
                         {/* User Section */}

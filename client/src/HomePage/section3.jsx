@@ -4,7 +4,7 @@ import { LuScaling } from "react-icons/lu";
 import { GiUpgrade } from "react-icons/gi";
 export default function Section3() {
     return (
-        <div className="flex flex-col relative items-center  p-16 min-h-[680px] bg-[#030b1c] text-gray-300 ss4 rounded-3xl">
+        <div id="about" className="flex flex-col relative items-center  p-16 min-h-[680px] bg-[#030b1c] text-gray-300 ss4 rounded-3xl">
             <h1 className="md:text-5xl text-4xl">Start Scaling your Hiring</h1>
             <h2 className="md:text-5xl mt-2  text-4xl">Efforts with Ease</h2>
             <h1 className="md:text-xl  mt-2 text-lg">Effortlessly manage your hiring process and quickly connect with top talent to scale your team.</h1>

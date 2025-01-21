@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import TalentPage from "./TalentPage/TalentPage.jsx";
 import RegisterTalent from "./TalentPage/RegisterTalent.jsx";
@@ -13,7 +13,7 @@ function isAdmin() {
   if (!token) return false;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    console.log(payload); 
+    console.log(payload);
     return payload.role === "admin";
   } catch (error) {
     console.error("Invalid JWT:", error.message);

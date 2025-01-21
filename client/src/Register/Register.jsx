@@ -32,6 +32,7 @@ const AuthPage = () => {
         localStorage.setItem('jwt', token);
         alert(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
         navigate('/');
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error during authentication:', error);
