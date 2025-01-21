@@ -12,12 +12,16 @@ const generateToken = (userId,role,username) => {
   try {
     console.log("efefe",req.body)
 
-    const { username, email, password } = req.body;
+    const { username, email, password,phoneno } = req.body;
 
-    if(!username||!email || !password ){
+    if(!username||!email || !password || !phoneno ){
         return res.status(400).json({ error: "fill all details" });
     }
-
+    
+    const phoneRegex = /^[6-9]\\d{9}$/;
+    if (!phoneRegex.test(phoneno)) {
+      return res.status(400).json({ error: "Invalid phone number" });
+    }
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: "Username already exists" });
@@ -30,6 +34,7 @@ const generateToken = (userId,role,username) => {
       username,
       email,
       password: hashedPassword,
+      phoneno
     });
     console.log(newUser)
 

@@ -12,10 +12,10 @@ const Schema = mongoose.Schema({
         type:String,
         required:true
     },
-    // phoneno:{
-    //     type:String,
-    //     required:true
-    // },
+    phoneno:{
+        type:String,
+        required:true
+    },
     profilephoto:{
         type:String,
         required:false,

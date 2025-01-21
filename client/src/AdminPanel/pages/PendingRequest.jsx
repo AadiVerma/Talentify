@@ -143,7 +143,7 @@ const ClientRequestsPage = () => {
     }
     const fetchRequests = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/v1/get-non-talents");
+        const response = await fetch( `${import.meta.env.VITE_BASE_URL}/api/v1/get-non-talents`);
         const data = await response.json();
         console.log(data.talents)
         
@@ -168,7 +168,7 @@ const ClientRequestsPage = () => {
   const handleAccept = async (id) => {
     try {
       console.log("id",id)
-      await axios.post('http://localhost:5000/api/v1/update-talent', {
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/api/v1/update-talent`, {
         approve: true,
         id: id
       });
@@ -184,13 +184,10 @@ const ClientRequestsPage = () => {
   
   const handleReject = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/v1/update-reject-talent/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ approve: false }),
-      });
+      await axios.post( `${import.meta.env.VITE_BASE_URL}/api/v1/update-talent`, {
+        approve: false,
+        id: id
+      });      
       
       setRequests((prev) =>
         prev.map((req) => (req._id === id ? { ...req, approve: false } : req))

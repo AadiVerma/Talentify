@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Mail, Lock, User, ArrowRight, Github, Linkedin } from 'lucide-react';
+import { CheckCircle, Mail, Lock, User, ArrowRight, Github, Linkedin, Phone } from 'lucide-react';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [signupField, setSignupField] = useState(''); // Additional field for Sign Up
+  const [phoneNo, setPhoneNo] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const endpoint = isLogin
-      ? 'http://localhost:5000/api/v1/login' // Adjust to your backend login route
-      : 'http://localhost:5000/api/v1/signup'; // Adjust to your backend signup route
+      ?  `${import.meta.env.VITE_BASE_URL}/api/v1/login`
+      :  `${import.meta.env.VITE_BASE_URL}/api/v1/signup`;
 
     const payload = isLogin
-      ? { email:email, password:password, }
-      : { email:email, password:password, username:name, phoneno: signupField };
+      ? { email, password }
+      : { 
+          email,
+          password,
+          username: name,
+          phoneno: phoneNo // Include phone number in signup payload
+        };
 
     try {
       const response = await axios.post(endpoint, payload);
-       console.log(response,response)
+      console.log(response, response);
       const token = response.data.token;
 
       if (token) {
@@ -43,7 +48,6 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
       <div className="w-full max-w-4xl flex rounded-2xl shadow-2xl overflow-hidden">
-        {/* Left Panel - Hero/Branding Section */}
         <div className="hidden lg:flex lg:w-1/2 bg-purple-600 p-12 flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
             <h1 className="text-4xl font-bold text-white mb-6">Talentify</h1>
@@ -87,22 +91,38 @@ const AuthPage = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">UserName</label>
-                  <div className="relative">
-                    <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Enter your username"
-                    />
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Username</label>
+                    <div className="relative">
+                      <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Enter your username"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
 
-            
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                    <div className="relative">
+                      <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="tel"
+                        value={phoneNo}
+                        onChange={(e) => setPhoneNo(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Enter your phone number"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Email</label>
@@ -114,6 +134,7 @@ const AuthPage = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Enter your email"
+                    required
                   />
                 </div>
               </div>
@@ -128,6 +149,7 @@ const AuthPage = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Enter your password"
+                    required
                   />
                 </div>
               </div>

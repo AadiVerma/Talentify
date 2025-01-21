@@ -1,20 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { MdOutlineDashboard } from "react-icons/md";
 import { PiChatsBold } from "react-icons/pi";
 import { IoLogOut } from "react-icons/io5";
-import { GrGroup } from "react-icons/gr";
 
 const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
   const [contentVisible, setContentVisible] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const sidebarRef = useRef(null);
 
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setSidebarOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("jwt"); 
+    navigate("/signup");
   };
 
   useEffect(() => {
@@ -68,7 +73,7 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
               {React.createElement(menu.icon, { size: "30" })}
               {menu.count !== undefined && (
                 <div
-                  className={`absolute -top-2 -right-2 flex 2px items-center justify-center rounded-full bg-purple-900 text-white text-xs font-bold w-5 h-5`}
+                  className={`absolute -top-2 -right-2 flex items-center justify-center rounded-full bg-purple-900 text-white text-xs font-bold w-5 h-5`}
                 >
                   {menu.count}
                 </div>
@@ -84,23 +89,23 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
       </div>
 
       <div className="mt-auto py-3 px-2 pb-6">
-  <button
-    className={`flex items-center ${
-      sidebarOpen ? "gap-2 pr-36 pl-2" : "justify-center p-2"
-    } pt-2 pb-2 rounded-md group hover:bg-purple-100`}
-  >
-    <IoLogOut size={26} className="text-purple-800" />
-    {sidebarOpen && contentVisible && (
-      <div
-        style={{ transitionDelay: `${(menus.length + 3) * 100}ms` }}
-        className="text-sm whitespace-pre duration-500 translate-x-4 text-gray-600 font-extrabold"
-      >
-        Logout
+        <button
+          className={`flex items-center ${
+            sidebarOpen ? "gap-2 pr-36 pl-2" : "justify-center p-2"
+          } pt-2 pb-2 rounded-md group hover:bg-purple-100`}
+          onClick={handleLogout}
+        >
+          <IoLogOut size={26} className="text-purple-800" />
+          {sidebarOpen && contentVisible && (
+            <div
+              style={{ transitionDelay: "500ms" }}
+              className="text-sm whitespace-pre duration-500 translate-x-4 text-gray-600 font-extrabold"
+            >
+              Logout
+            </div>
+          )}
+        </button>
       </div>
-    )}
-  </button>
-</div>
-
     </div>
   );
 };
