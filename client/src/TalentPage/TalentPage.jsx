@@ -36,6 +36,11 @@ const TalentPage = () => {
 
   const filteredTalents = Array.isArray(talents)
     ? talents.filter((talent) => {
+        // First check if the talent is approved
+        if (!talent.approve) {
+          return false;
+        }
+
         const fullName = `${talent.firstname} ${talent.lastname}`.toLowerCase();
         const nameMatch = fullName.includes(searchQuery.toLowerCase());
 
