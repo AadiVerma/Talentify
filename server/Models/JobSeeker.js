@@ -24,11 +24,11 @@ const jobSeekerSchema = mongoose.Schema({
         type:Number,
         required:true
     },
-    User:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        required:true
-    }
+    // User:{
+    //     type:mongoose.Schema.Types.ObjectId,
+    //     ref:'User',
+    //     required:true
+    // }
 
 })
 export default mongoose.model('JobSeeker', jobSeekerSchema);
