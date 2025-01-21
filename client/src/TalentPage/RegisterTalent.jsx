@@ -13,10 +13,25 @@ function RegisterTalent() {
   });
 
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB");
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!allowedTypes.includes(file.type)) {
+        alert("Please upload only JPG, JPEG or PNG files");
+        return;
+      }
+
       setFormData({ ...formData, photo: file });
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -28,24 +43,36 @@ function RegisterTalent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsUploading(true);
+    setUploadStatus("Uploading...");
+
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name);
     formDataToSend.append("skills", formData.skills);
     formDataToSend.append("description", formData.description);
-    formDataToSend.append("photo", formData.photo);
+    if (formData.photo) {
+      formDataToSend.append("photo", formData.photo);
+    }
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/talent", // Replace with your backend API URL
+        "http://localhost:5000/api/talent",
         formDataToSend,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      console.log(response.data);
-      navigate("/talent-page"); // Redirecting to talent page after success
+
+      console.log("Upload successful:", response.data);
+      setUploadStatus("Upload successful!");
+      setTimeout(() => {
+        navigate("/talent-page");
+      }, 1000);
     } catch (error) {
       console.error("Error submitting form:", error);
+      setUploadStatus("Upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -56,7 +83,7 @@ function RegisterTalent() {
         {/* Back Navigation */}
         <Link
           to="/talent-page"
-          className="absolute top-8 left-8 inline-flex items-center text-purple-900 hover:text-purple-800 transition-colors duration-300 ss4"
+          className="absolute top-8 left-8 inline-flex items-center text-purple-900 hover:text-purple-800 transition-colors duration-300"
         >
           <ArrowLeft size={20} className="mr-2" />
           Back to Talent Page
@@ -64,12 +91,12 @@ function RegisterTalent() {
 
         {/* Header Section */}
         <div className="text-center pt-8 pb-6 max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl font-bold text-purple-900 mb-4 ss4">
+          <h1 className="text-4xl font-bold text-purple-900 mb-4">
             Join Our Talent Pool
           </h1>
         </div>
       </div>
-      <p className="text-gray-600 max-w-2xl mx-auto ss4">
+      <p className="text-gray-600 max-w-2xl mx-auto text-center px-4">
         Connect with amazing opportunities and showcase your skills to top
         companies worldwide.
       </p>
@@ -80,28 +107,28 @@ function RegisterTalent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
             <Sparkles className="h-8 w-8 text-purple-500 mb-4" />
-            <h3 className="font-semibold text-gray-900 mb-2 ss4">
+            <h3 className="font-semibold text-gray-900 mb-2">
               Showcase Talent
             </h3>
-            <p className="text-gray-600 text-sm ss4">
+            <p className="text-gray-600 text-sm">
               Highlight your unique skills and experience to stand out
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
             <Code className="h-8 w-8 text-purple-500 mb-4" />
-            <h3 className="font-semibold text-gray-900 mb-2 ss4">
+            <h3 className="font-semibold text-gray-900 mb-2">
               Share Expertise
             </h3>
-            <p className="text-gray-600 text-sm ss4">
+            <p className="text-gray-600 text-sm">
               List your technical skills and professional achievements
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
             <Briefcase className="h-8 w-8 text-purple-500 mb-4" />
-            <h3 className="font-semibold text-gray-900 mb-2 ss4">
+            <h3 className="font-semibold text-gray-900 mb-2">
               Find Opportunities
             </h3>
-            <p className="text-gray-600 text-sm ss4">
+            <p className="text-gray-600 text-sm">
               Get matched with projects that fit your expertise
             </p>
           </div>
@@ -112,7 +139,7 @@ function RegisterTalent() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Photo Upload */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 ss4">
+              <label className="block text-sm font-medium text-gray-700">
                 Profile Photo
               </label>
               <div className="flex flex-col items-center">
@@ -127,7 +154,7 @@ function RegisterTalent() {
                     ) : (
                       <div className="text-center">
                         <Upload className="mx-auto h-12 w-12 text-purple-400 group-hover:text-purple-500 transition-colors" />
-                        <span className="mt-2 block text-xs text-purple-400 group-hover:text-purple-500 transition-colors ss4">
+                        <span className="mt-2 block text-xs text-purple-400 group-hover:text-purple-500 transition-colors">
                           Upload photo
                         </span>
                       </div>
@@ -135,18 +162,29 @@ function RegisterTalent() {
                   </div>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/jpg"
                     onChange={handlePhotoChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
+                {uploadStatus && (
+                  <p
+                    className={`text-sm ${
+                      uploadStatus.includes("failed")
+                        ? "text-red-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {uploadStatus}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 ss4">
+                <label className="block text-sm font-medium text-gray-700">
                   Full Name
                 </label>
                 <input
@@ -156,14 +194,14 @@ function RegisterTalent() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow ss4"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
                   placeholder="Enter your full name"
                 />
               </div>
 
               {/* Skills Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 ss4">
+                <label className="block text-sm font-medium text-gray-700">
                   Skills
                 </label>
                 <input
@@ -173,7 +211,7 @@ function RegisterTalent() {
                   onChange={(e) =>
                     setFormData({ ...formData, skills: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow ss4"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
                   placeholder="e.g., React, UI/UX, Python"
                 />
               </div>
@@ -181,7 +219,7 @@ function RegisterTalent() {
 
             {/* Description Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 ss4">
+              <label className="block text-sm font-medium text-gray-700">
                 Brief Description
               </label>
               <textarea
@@ -191,7 +229,7 @@ function RegisterTalent() {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 rows={4}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow ss4"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
                 placeholder="Tell us about your experience and what you're looking for..."
               />
             </div>
@@ -199,9 +237,15 @@ function RegisterTalent() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-purple-900 text-white py-4 px-6 rounded-lg hover:bg-purple-800 transition-all duration-300 font-medium hover:shadow-lg transform hover:-translate-y-0.5 ss4"
+              disabled={isUploading}
+              className={`w-full bg-purple-900 text-white py-4 px-6 rounded-lg transition-all duration-300 font-medium
+                ${
+                  isUploading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-purple-800 hover:shadow-lg transform hover:-translate-y-0.5"
+                }`}
             >
-              Submit Profile
+              {isUploading ? "Uploading..." : "Submit Profile"}
             </button>
           </form>
         </div>

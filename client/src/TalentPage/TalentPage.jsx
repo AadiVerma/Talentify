@@ -9,7 +9,6 @@ import {
   Phone,
   MapPin,
   Star,
-  ExternalLink,
 } from "lucide-react";
 
 const TalentPage = () => {
@@ -62,9 +61,12 @@ const TalentPage = () => {
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center gap-2">
               <Star className="text-purple-600 w-8 h-8" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
+              <Link
+                className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent"
+                to="/"
+              >
                 Talentify
-              </h1>
+              </Link>
             </div>
 
             {/* Desktop Navigation */}
