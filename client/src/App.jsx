@@ -13,6 +13,7 @@ function isAdmin() {
   if (!token) return false;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
+    console.log(payload); 
     return payload.role === "admin";
   } catch (error) {
     console.error("Invalid JWT:", error.message);
