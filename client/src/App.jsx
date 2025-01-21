@@ -21,8 +21,9 @@ function App() {
           <Route path="pending-hire-req" element={<PendingHireRequest />} />
 
         </Route>
+        <Route path="/talent-page" element={<TalentPage />} /> {/* Default Route */}
+        <Route path="/talents" element={<TalentPage />} /> {/* Specific Route */}
         <Route path="/" element={<Home />} /> 
-        <Route path="/talents" element={<TalentPage />} /> 
         <Route path="/register-talent" element={<RegisterTalent />} />
       </Routes>
     </Router>
