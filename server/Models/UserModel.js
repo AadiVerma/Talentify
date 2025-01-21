@@ -12,18 +12,20 @@ const Schema = mongoose.Schema({
         type:String,
         required:true
     },
-    phoneno:{
-        type:String,
-        required:true
-    },
+    // phoneno:{
+    //     type:String,
+    //     required:true
+    // },
     profilephoto:{
         type:String,
-        required:true
+        required:false,
     },
     role:{
         type:String,
-        required:true,
+        required:false,
+        default:"hirer",
         enum:['job-seeker','admin','hirer'],
+        default:'job-seeker'
     },
     jobseeker:{
         type:mongoose.Schema.Types.ObjectId,
@@ -33,7 +35,7 @@ const Schema = mongoose.Schema({
     status:{
         type:String,
         required:false,
-        default:"rejected",
+        default:"pending",
         enum:['rejected','hired','pending']
     }
 })

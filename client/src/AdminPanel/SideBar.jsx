@@ -29,9 +29,7 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
 
   const menus = [
     { name: "DashBoard", link: "/admin/dashboard", icon: MdOutlineDashboard },
-    { name: "Accepted Team", link: "/admin/accepted-req", icon: GrGroup },
     { name: "Pending Request", link: "/admin/pending-req", icon: PiChatsBold, count: 12 },
-    { name: "Pending Hire Request", link: "/admin/pending-hire-req", icon: PiChatsBold, count: 8 },
   ];
 
   return (
@@ -85,19 +83,24 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
         ))}
       </div>
 
-      <div className="mt-auto py-3 px-0 pb-6">
-        <button className="flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md group hover:bg-purple-100">
-          <IoLogOut size={26} className="text-purple-800" />
-          {sidebarOpen && contentVisible && (
-            <div
-              style={{ transitionDelay: `${(menus.length + 3) * 100}ms` }}
-              className="text-sm whitespace-pre duration-500 translate-x-4 text-gray-600 font-extrabold"
-            >
-              Logout
-            </div>
-          )}
-        </button>
+      <div className="mt-auto py-3 px-2 pb-6">
+  <button
+    className={`flex items-center ${
+      sidebarOpen ? "gap-2 pr-36 pl-2" : "justify-center p-2"
+    } pt-2 pb-2 rounded-md group hover:bg-purple-100`}
+  >
+    <IoLogOut size={26} className="text-purple-800" />
+    {sidebarOpen && contentVisible && (
+      <div
+        style={{ transitionDelay: `${(menus.length + 3) * 100}ms` }}
+        className="text-sm whitespace-pre duration-500 translate-x-4 text-gray-600 font-extrabold"
+      >
+        Logout
       </div>
+    )}
+  </button>
+</div>
+
     </div>
   );
 };

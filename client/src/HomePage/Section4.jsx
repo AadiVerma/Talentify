@@ -19,7 +19,7 @@ export default function Section4() {
                 Have questions about Talentify or need help getting started? Our team is here to assist you. Whether you're looking to showcase your skills or hire the best talent, we’re ready to support you every step of the way.
             </h2>
             <div className='flex gap-20'>
-            <div>
+            <div className='hidden md:block'>
                 <img src={BackgroundImage} alt="Contact Us" className="w-96 h-full object-cover " />
             </div>
             <div className="mt-8 w-full max-w-lg">

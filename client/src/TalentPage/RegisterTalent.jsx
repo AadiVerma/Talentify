@@ -1,8 +1,18 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload } from "lucide-react";
-
+import { ArrowLeft ,Upload } from "lucide-react";
+function isAdmin() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role === "admin";
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
 function RegisterTalent() {
   const navigate = useNavigate();
   const availableSkills = [
@@ -136,6 +146,11 @@ function RegisterTalent() {
 
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
   const [searchSkill, setSearchSkill] = useState("");
+  useEffect(() => {
+    if (isAdmin()) {
+      navigate("/");
+    }
+  },[])
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -201,7 +216,7 @@ function RegisterTalent() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/v1/register-talent",
+        `${import.meta.env.VITE_BASE_URL}/api/v1/register-talent`,
         formDataToSend,
         {
           headers: {
