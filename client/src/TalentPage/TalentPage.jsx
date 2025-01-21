@@ -21,7 +21,9 @@ const TalentPage = () => {
   useEffect(() => {
     const fetchTalents = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/talents");
+        const response = await fetch(
+          "http://localhost:5000/api/v1/get-talents"
+        );
         const data = await response.json();
         setTalents(data);
       } catch (error) {
@@ -34,17 +36,19 @@ const TalentPage = () => {
 
   const filteredTalents = Array.isArray(talents)
     ? talents.filter((talent) => {
-        const nameMatch = talent.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+        const fullName = `${talent.firstname} ${talent.lastname}`.toLowerCase();
+        const nameMatch = fullName.includes(searchQuery.toLowerCase());
+
         const skillMatch = Array.isArray(talent.skills)
           ? talent.skills.some((skill) =>
               skill.toLowerCase().includes(searchQuery.toLowerCase())
             )
           : false;
+
         const filterMatch =
           !filter ||
           (Array.isArray(talent.skills) && talent.skills.includes(filter));
+
         return (nameMatch || skillMatch) && filterMatch;
       })
     : [];
@@ -59,10 +63,9 @@ const TalentPage = () => {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center gap-2">
-              <Star className="text-purple-600 w-8 h-8" />
+            <div className="flex items-center gap-3">
               <Link
-                className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent"
+                className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent"
                 to="/"
               >
                 Talentify
@@ -85,9 +88,9 @@ const TalentPage = () => {
               </Link>
               <Link
                 to="/register-talent"
-                className="bg-purple-600 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
+                className="bg-purple-700 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
               >
-                Join as Talent
+                Get Hired
               </Link>
               <Link to="/profile" className="group">
                 <div className="w-11 h-11 rounded-full bg-purple-50 flex items-center justify-center border-2 border-purple-100 group-hover:border-purple-300 transition-colors">
@@ -202,66 +205,72 @@ const TalentPage = () => {
             <div
               className={`grid grid-cols-1 sm:grid-cols-2 ${
                 selectedTalent ? "lg:grid-cols-2" : "lg:grid-cols-3"
-              } gap-6`}
+              } gap-4`}
             >
               {filteredTalents.length > 0 ? (
                 filteredTalents.map((talent) => (
                   <div
-                    key={talent.id || talent.name}
-                    className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer h-[28rem]"
+                    key={talent.id || `${talent.firstname}-${talent.lastname}`}
+                    className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer h-[16rem]"
                     onClick={() => setSelectedTalent(talent)}
                   >
-                    <div className="p-6 h-full flex flex-col">
-                      <div className="relative mb-4">
-                        <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-purple-50 group-hover:border-purple-100 transition-colors">
-                          <img
-                            src={talent.photo || "/api/placeholder/96/96"}
-                            className="w-full h-full object-cover"
-                          />
+                    <div className="p-4 h-full flex flex-col">
+                      {/* Profile section - horizontal layout */}
+                      <div className="flex gap-4 mb-3">
+                        {/* Left side - Profile picture */}
+                        <div className="relative flex-shrink-0 px-8">
+                          <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-50 group-hover:border-purple-100 transition-colors">
+                            <img
+                              src={talent.photo || "/api/placeholder/96/96"}
+                              className="w-full h-full object-cover "
+                            />
+                          </div>
+                          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
                         </div>
-                        <div className="absolute bottom-0 right-1/3 w-5 h-5 bg-green-400 border-3 border-white rounded-full"></div>
+
+                        {/* Right side - Name, Experience, Skills */}
+                        <div className="flex-grow min-w-0">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                            {`${talent.firstname} ${talent.lastname}`}
+                          </h3>
+                          <p className="text-purple-600 font-medium text-sm mb-2">
+                            {`${talent.experience} Years Experience`}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {Array.isArray(talent.skills) &&
+                              talent.skills.slice(0, 2).map((skill, index) => (
+                                <span
+                                  key={`${skill}-${index}`}
+                                  className="px-2 py-1 bg-purple-50 text-purple-600 text-xs font-medium rounded-lg"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            {Array.isArray(talent.skills) &&
+                              talent.skills.length > 2 && (
+                                <span className="px-2 py-1 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg">
+                                  +{talent.skills.length - 2}
+                                </span>
+                              )}
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="text-center mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                          {talent.name}
-                        </h3>
-                        <p className="text-purple-600 font-medium">
-                          {talent.skills}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 justify-center mb-2">
-                        {Array.isArray(talent.skills) &&
-                          talent.skills.slice(0, 3).map((skill, index) => (
-                            <span
-                              key={`${skill}-${index}`}
-                              className="px-3 py-1.5 bg-purple-50 text-purple-600 text-sm font-medium rounded-lg"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        {Array.isArray(talent.skills) &&
-                          talent.skills.length > 3 && (
-                            <span className="px-3 py-1.5 bg-gray-50 text-gray-600 text-sm font-medium rounded-lg">
-                              +{talent.skills.length - 3}
-                            </span>
-                          )}
-                      </div>
-
-                      <p className="text-gray-600 text-center mb-2 overflow-hidden text-ellipsis line-clamp-2 flex-grow">
+                      {/* Description with 2 lines and ellipsis */}
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                         {talent.description}
                       </p>
 
+                      {/* Hire Button */}
                       <button
-                        className="w-full flex items-center justify-center gap-1 bg-purple-600 text-white py-3.5 px-2 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md"
+                        className="mt-auto w-full flex items-center justify-center gap-1 bg-purple-600 text-white py-2.5 px-2 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleHire(talent.id);
                         }}
                       >
-                        <Briefcase size={18} />
-                        <span className="font-medium">Hire Me</span>
+                        <Briefcase size={16} />
+                        <span className="font-medium text-sm">Hire</span>
                       </button>
                     </div>
                   </div>
@@ -289,38 +298,34 @@ const TalentPage = () => {
                 <X size={20} className="text-gray-400" />
               </button>
 
+              {/* Profile Section */}
               <div className="text-center mb-8">
                 <div className="w-36 h-36 mx-auto rounded-full overflow-hidden border-4 border-purple-50 mb-6">
                   <img
                     src={selectedTalent.photo || "/api/placeholder/144/144"}
+                    alt={`${selectedTalent.firstname} ${selectedTalent.lastname}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {selectedTalent.name}
+                  {`${selectedTalent.firstname} ${selectedTalent.lastname}`}
                 </h2>
                 <p className="text-purple-600 font-medium">
-                  {selectedTalent.title || "Professional"}
+                  {`${selectedTalent.experience} Years Experience`}
                 </p>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <MapPin size={18} className="text-purple-600" />
-                  <span>{selectedTalent.location || "Remote"}</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <Mail size={18} className="text-purple-600" />
-                  <span>{selectedTalent.email || "contact@example.com"}</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  <Phone size={18} className="text-purple-600" />
-                  <span>{selectedTalent.phone || "+1 234 567 890"}</span>
-                </div>
+              {/* Description */}
+              <div className="mb-8">
+                <h3 className="font-semibold text-gray-900 mb-3">About</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {selectedTalent.description}
+                </p>
               </div>
 
+              {/* Skills Section */}
               <div className="mb-8">
-                <h3 className="font-semibold text-gray-900 mb-4">
+                <h3 className="font-semibold text-gray-900 mb-3">
                   Skills & Expertise
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -335,12 +340,21 @@ const TalentPage = () => {
                     ))}
                 </div>
               </div>
+
+              {/* Hire Button */}
+              <button
+                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md font-medium"
+                onClick={() => handleHire(selectedTalent.id)}
+              >
+                <Briefcase size={20} />
+                <span>Hire {selectedTalent.firstname}</span>
+              </button>
             </div>
           )}
         </div>
       </main>
 
-      <footer className="bg-white border-t border-gray-100 mt-16">
+      {/* <footer className="bg-white border-t border-gray-100 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -400,7 +414,7 @@ const TalentPage = () => {
             </p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };
