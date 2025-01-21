@@ -10,7 +10,13 @@
     font-weight: 600;
     font-style: normal;
 }
+.ss4-dark{
+    font-family: "Source Serif 4", serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
 ::selection {
-    background-color: #817df6;
-    color: black;
+    background-color: #a5a1fc;
+    color: white;
 }

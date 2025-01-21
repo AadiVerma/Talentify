@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { MdOutlineDashboard } from "react-icons/md";
-import { BiSolidVideos } from "react-icons/bi";
 import { PiChatsBold } from "react-icons/pi";
 import { IoLogOut } from "react-icons/io5";
 import { GrGroup } from "react-icons/gr";
@@ -31,7 +30,8 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
   const menus = [
     { name: "DashBoard", link: "/admin/dashboard", icon: MdOutlineDashboard },
     { name: "Accepted Team", link: "/admin/accepted-req", icon: GrGroup },
-    { name: "Pending Request", link: "/admin/pending-req", icon: PiChatsBold },
+    { name: "Pending Request", link: "/admin/pending-req", icon: PiChatsBold, count: 12 },
+    { name: "Pending Hire Request", link: "/admin/pending-hire-req", icon: PiChatsBold, count: 8 },
   ];
 
   return (
@@ -60,22 +60,27 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
           <Link
             to={menu.link}
             key={i}
-            className={`flex items-center gap-2 p-2 rounded-md hover:bg-purple-100 group ${
+            className={`relative flex items-center gap-2 p-2 rounded-md hover:bg-purple-100 group ${
               location.pathname === menu.link
                 ? "bg-purple-200 text-purple-800"
                 : "text-gray-600 hover:text-purple-700"
             }`}
           >
-            <div className="text-purple-900">
+            <div className="text-purple-900 relative">
               {React.createElement(menu.icon, { size: "30" })}
+              {menu.count !== undefined && (
+                <div
+                  className={`absolute -top-2 -right-2 flex 2px items-center justify-center rounded-full bg-purple-900 text-white text-xs font-bold w-5 h-5`}
+                >
+                  {menu.count}
+                </div>
+              )}
             </div>
-            <div
-              className={`text-sm font-bold  rounded    whitespace-pre duration-500 ${
-                sidebarOpen ? "translate-x-0" : "translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-4"
-              }`}
-            >
-              {menu.name}
-            </div>
+            {sidebarOpen && (
+              <div className="text-sm font-bold whitespace-pre duration-500">
+                {menu.name}
+              </div>
+            )}
           </Link>
         ))}
       </div>
