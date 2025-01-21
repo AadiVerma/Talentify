@@ -12,17 +12,18 @@ const Schema = mongoose.Schema({
         type:String,
         required:true
     },
-    phoneno:{
-        type:String,
-        required:true
-    },
+    // phoneno:{
+    //     type:String,
+    //     required:true
+    // },
     profilephoto:{
         type:String,
-        required:true
+        required:false,
     },
     role:{
         type:String,
-        required:true,
+        required:false,
+        default:"hirer",
         enum:['job-seeker','admin','hirer'],
     },
     jobseeker:{

@@ -34,6 +34,7 @@ const RegisterController = async (req, res) => {
 
 const GetTalentsController = async (req, res) => {
   try {
+    console.log("cffefedede")
     const talents = await JobSeeker.find();
     res.status(200).json(talents);
   } catch (error) {
@@ -43,4 +44,46 @@ const GetTalentsController = async (req, res) => {
   }
 };
 
-export { RegisterController, GetTalentsController };
+
+
+const GetTalentsNotApproved = async (req, res) => {
+
+  try {
+    const talents = await JobSeeker.find({ approve: false });
+    res.status(200).json({ approved: false, talents });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch not approved talents", error: error.message });
+  }
+};
+
+const UpdateJobSeekerApproval = async (req, res) => {
+  console.log(req.body)
+  const { id,approve } = req.body;
+  console.log("id",id);
+
+  try {
+    const updatedJobSeeker = await JobSeeker.findByIdAndUpdate(
+      id,
+      { approve: approve },
+    );
+
+    if (!updatedJobSeeker) {
+      return res.status(404).json({ message: "JobSeeker not found" });
+    }
+
+    res.status(200).json({
+      message: "JobSeeker approval updated successfully",
+      jobSeeker: updatedJobSeeker,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update JobSeeker approval",
+      error: error.message,
+    });
+  }
+};
+
+
+export { RegisterController, GetTalentsController,GetTalentsNotApproved,UpdateJobSeekerApproval };
