@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
@@ -158,7 +159,7 @@ const DetailPanel = ({ request, onClose }) => (
   </div>
 );
 
-const ClientRequestsPage = () => {
+const PendingHireRequest = () => {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -181,7 +182,7 @@ const ClientRequestsPage = () => {
       <div className="flex  transition-all duration-300">
         {/* Main content */}
         <div className={`flex-1 p-6 ${selectedRequest ? 'lg:w-2/3' : 'w-full'}`}>
-          <h1 className="text-3xl font-bold text-purple-700 mb-8">Client Requests</h1>
+          <h1 className="text-3xl font-bold text-purple-700 mb-8">Organization Requests</h1>
           
           {loading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -223,4 +224,4 @@ const ClientRequestsPage = () => {
   );
 };
 
-export default ClientRequestsPage;
+export default PendingHireRequest;
