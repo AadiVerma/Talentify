@@ -33,7 +33,6 @@ const AuthPage = () => {
       const token = response.data.token;
 
       if (token) {
-        // Store token in localStorage
         localStorage.setItem('jwt', token);
         toast.success(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
         navigate('/');
