@@ -1,7 +1,7 @@
 import React, { useState ,useEffect} from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft ,Upload } from "lucide-react";
 function isAdmin() {
   const token = localStorage.getItem("jwt");
   if (!token) return false;
@@ -155,52 +155,94 @@ function RegisterTalent() {
     firstName: "",
     lastName: "",
     email: "",
+    photo: null,
+    photoPreview: null,
     skills: [],
     experience: "",
     description: "",
     approve: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+      setFormData({
+        ...formData,
+        photo: file,
+        photoPreview: URL.createObjectURL(file),
+      });
+      setError(""); // Clear any previous errors
+    }
+  };
+
+  const validateForm = () => {
+    if (!formData.firstName.trim()) return "First name is required";
+    if (!formData.lastName.trim()) return "Last name is required";
+    if (!formData.email.trim()) return "Email is required";
+    if (!formData.skills.length) return "Please select at least one skill";
+    if (!formData.experience) return "Experience is required";
+    if (!formData.description.trim()) return "Description is required";
+    return null;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.skills.length ||
-      !formData.experience ||
-      !formData.description
-    ) {
-      console.error("All fields are required");
+    setError(""); // Clear previous errors
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
+
     setIsSubmitting(true);
     try {
-      console.log("Sending data:", {
-        firstname: formData.firstName,
-        lastname: formData.lastName,
-        email: formData.email,
-        skills: formData.skills,
-        experience: Number(formData.experience),
-        description: formData.description,
-      });
-      console.log(import.meta.env.VITE_BASE_URL); 
-      // console.log(formDataToSend);
+      const formDataToSend = new FormData();
+      formDataToSend.append("firstname", formData.firstName.trim());
+      formDataToSend.append("lastname", formData.lastName.trim());
+      formDataToSend.append("email", formData.email.trim());
+      formDataToSend.append("skills", JSON.stringify(formData.skills));
+      formDataToSend.append("experience", Number(formData.experience));
+      formDataToSend.append("description", formData.description.trim());
+
+      if (formData.photo) {
+        formDataToSend.append("profilephoto", formData.photo);
+      }
+
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/api/v1/register-talent`,
+        formDataToSend,
         {
-          firstname: formData.firstName, 
-          lastname: formData.lastName, 
-          email: formData.email,
-          skills: formData.skills,
-          experience: Number(formData.experience), 
-          description: formData.description,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          validateStatus: function (status) {
+            return status >= 200 && status < 500; // Handle HTTP errors properly
+          },
         }
       );
-      // setTimeout(() => navigate("/talent-page"), 1000);
+
+      if (response.status === 201 || response.status === 200) {
+        // Success case
+        setTimeout(() => navigate("/talent-page"), 500);
+      } else {
+        // Handle other status codes
+        setTimeout(() => navigate("/talent-page"), 500);
+        throw new Error(response.data.message || "Registration failed");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Error submitting form. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -227,7 +269,7 @@ function RegisterTalent() {
   return (
     <div className="h-screen bg-gradient-to-b ss4 from-purple-50 to-white">
       <div className="h-full flex flex-col">
-        <header className="bg-gradient-to-b from-purple-50 to-purple-50/95 backdrop-blur-sm z-50 py-6 px-6">
+        <header className="bg-gradient-to-b from-purple-50 to-purple-50/95 backdrop-blur-sm z-50 py-3 px-6">
           <Link
             to="/talent-page"
             className="inline-flex items-center text-purple-900 hover:text-purple-800 transition-colors"
@@ -237,23 +279,24 @@ function RegisterTalent() {
           </Link>
         </header>
 
-        <div className="flex-1 px-4 py-0">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-3 pb-10">
-              <h1 className="text-2xl font-bold text-purple-900">
+        <div className="flex-1 px-4">
+          <div className="max-w-3xl mx-auto h-full">
+            <div className="text-center mb-2">
+              <h1 className="text-xl font-bold text-purple-900">
                 Join Our Global Talent Network
               </h1>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 text-xs">
                 Connect with opportunities that match your expertise
               </p>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-4 border border-purple-100">
-              <h2 className="text-lg font-bold text-purple-900 mb-3">
+              <h2 className="text-base font-bold text-purple-900 mb-2">
                 Personal Information
               </h2>
-              <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
-                <div className="col-span-2 md:col-span-1 space-y-1">
+              <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-2">
+                {/* First Name and Last Name */}
+                <div className="col-span-1 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
                     First Name
                   </label>
@@ -264,12 +307,12 @@ function RegisterTalent() {
                     onChange={(e) =>
                       setFormData({ ...formData, firstName: e.target.value })
                     }
-                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
+                    className="w-full p-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
                     placeholder="Enter first name"
                   />
                 </div>
 
-                <div className="col-span-2 md:col-span-1 space-y-1">
+                <div className="col-span-1 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
                     Last Name
                   </label>
@@ -280,12 +323,13 @@ function RegisterTalent() {
                     onChange={(e) =>
                       setFormData({ ...formData, lastName: e.target.value })
                     }
-                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
+                    className="w-full p-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
                     placeholder="Enter last name"
                   />
                 </div>
 
-                <div className="col-span-2 space-y-1">
+                {/* Email and Photo Upload */}
+                <div className="col-span-1 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
                     Email
                   </label>
@@ -296,19 +340,56 @@ function RegisterTalent() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
+                    className="w-full p-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
                     placeholder="Enter email address"
                   />
                 </div>
 
+                <div className="col-span-1 space-y-0.5">
+                  <label className="text-xs font-medium text-gray-700">
+                    Profile Photo
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-shrink-0">
+                      {formData.photoPreview ? (
+                        <img
+                          src={formData.photoPreview}
+                          alt="Profile preview"
+                          className="h-8 w-8 rounded-full object-cover border border-purple-200"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-purple-50 flex items-center justify-center border border-purple-200">
+                          <Upload className="h-4 w-4 text-purple-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        className="hidden"
+                        id="photo-upload"
+                      />
+                      <label
+                        htmlFor="photo-upload"
+                        className="cursor-pointer inline-flex items-center px-2 py-1 text-xs text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                      >
+                        <Upload className="h-3 w-3 mr-1" />
+                        {formData.photo ? "Change" : "Upload"}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Skills Selection */}
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-2 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
                     Skills
                   </label>
                   <div className="relative">
                     <div
-                      className="min-h-8 w-full p-1.5 border border-gray-300 rounded-lg cursor-text"
+                      className="min-h-7 w-full p-1 border border-gray-300 rounded-lg cursor-text"
                       onClick={() => setShowSkillsDropdown(true)}
                     >
                       <input
@@ -318,12 +399,12 @@ function RegisterTalent() {
                           setSearchSkill(e.target.value);
                           setShowSkillsDropdown(true);
                         }}
-                        className="w-full focus:outline-none text-sm"
+                        className="w-full focus:outline-none text-xs"
                         placeholder="Search and select skills..."
                       />
                     </div>
                     {showSkillsDropdown && (
-                      <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full max-h-40 overflow-y-auto">
+                      <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full max-h-32 overflow-y-auto text-xs">
                         {availableSkills
                           .filter((skill) =>
                             skill
@@ -333,36 +414,27 @@ function RegisterTalent() {
                           .map((skill, index) => (
                             <li
                               key={index}
-                              className="px-4 py-2 hover:bg-purple-100 cursor-pointer text-sm"
+                              className="px-2 py-1 hover:bg-purple-100 cursor-pointer"
                               onClick={() => handleSkillSelect(skill)}
                             >
                               {skill}
                             </li>
                           ))}
-                        {availableSkills.filter((skill) =>
-                          skill
-                            .toLowerCase()
-                            .includes(searchSkill.toLowerCase())
-                        ).length === 0 && (
-                          <li className="px-4 py-2 text-gray-500 text-sm">
-                            No skills found
-                          </li>
-                        )}
                       </ul>
                     )}
                   </div>
                   {formData.skills.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-1 flex flex-wrap gap-1">
                       {formData.skills.map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-purple-100 text-purple-900 text-xs px-2 py-1 rounded-full flex items-center"
+                          className="bg-purple-100 text-purple-900 text-xs px-2 py-0.5 rounded-full flex items-center"
                         >
                           {skill}
                           <button
                             type="button"
                             onClick={() => handleSkillRemove(skill)}
-                            className="ml-1 text-xs text-gray-600"
+                            className="ml-1 text-xs text-gray-600 hover:text-gray-800"
                           >
                             ×
                           </button>
@@ -372,13 +444,16 @@ function RegisterTalent() {
                   )}
                 </div>
 
-                <div className="col-span-2 space-y-1">
+                {/* Experience and Description */}
+                <div className="col-span-1 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
-                    Experience Level
+                    Experience (years)
                   </label>
                   <input
                     type="number"
                     required
+                    min="0"
+                    max="50"
                     value={formData.experience}
                     onChange={(e) =>
                       setFormData({
@@ -386,12 +461,12 @@ function RegisterTalent() {
                         experience: e.target.value,
                       })
                     }
-                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
-                    placeholder="Enter experience level"
+                    className="w-full p-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
+                    placeholder="Years of experience"
                   />
                 </div>
 
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-2 space-y-0.5">
                   <label className="text-xs font-medium text-gray-700">
                     Description
                   </label>
@@ -404,18 +479,44 @@ function RegisterTalent() {
                         description: e.target.value,
                       })
                     }
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500"
+                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500 min-h-[60px] text-sm"
                     placeholder="Tell us about yourself..."
                   />
                 </div>
 
-                <div className="col-span-2 mt-4 flex justify-center">
+                <div className="col-span-2 mt-2">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-2 text-white bg-purple-600 rounded-full w-full hover:bg-purple-700 transition-colors disabled:bg-gray-400"
+                    className="px-4 py-1.5 text-white bg-purple-600 rounded-full w-full hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
                   >
-                    {isSubmitting ? "Submitting..." : "Submit"}
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : (
+                      "Submit Application"
+                    )}
                   </button>
                 </div>
               </form>

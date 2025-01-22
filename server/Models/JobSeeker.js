@@ -27,7 +27,20 @@ const jobSeekerSchema = mongoose.Schema({
     approve : {
         type : Boolean,
         default : false,
+    },
+    likes : {
+        type : Number,
+        default : 0,
+    },
+    views : {
+        type : Number,
+        default : 0,
+    },
+    profilepic : {
+        type : String,
+        required : false,
     }
+    
     // User:{
     //     type:mongoose.Schema.Types.ObjectId,
     //     ref:'User',
