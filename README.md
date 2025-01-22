@@ -58,12 +58,11 @@ It offers:
 6. In Server Folder Navigate to Init folder
 7. In init file add the credentials of admin you want
 8. Add email of admin where all notifiations will recieve
-9. Add phone no where all notifications will be recieved via whatsapp
-10. Now in Client Folder
+9. Now in Client Folder
  ```bash
    npm run dev
    ```
-11. Now in Server Folder
+10. Now in Server Folder
 ```bash
    npm run start
    ```
