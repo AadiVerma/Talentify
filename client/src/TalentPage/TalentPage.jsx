@@ -14,6 +14,10 @@ import {
   Eye,
   User,
 } from "lucide-react";
+import NavProfileIcon from "./NavProfileIcon";
+
+import { jwtDecode } from "jwt-decode";
+
 function isAdmin() {
   const token = localStorage.getItem("jwt");
   if (!token) return false;
@@ -23,9 +27,9 @@ function isAdmin() {
   } catch (error) {
     console.error("Invalid JWT:", error.message);
     return false;
-  }}
+  }
+}
 
-  // Profile Icon Component for fallback
 const ProfileIcon = ({ className }) => (
   <div
     className={`w-full h-full flex items-center justify-center bg-purple-50 ${className}`}
@@ -60,6 +64,7 @@ const TalentPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const profilesPerPage = 15;
+  const [likedTalents, setLikedTalents] = useState(new Set());
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,7 +73,9 @@ const TalentPage = () => {
     }
     const fetchTalents = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/get-talents`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/api/v1/get-talents`
+        );
         const data = await response.json();
         setTalents(data);
       } catch (error) {
@@ -77,6 +84,34 @@ const TalentPage = () => {
     };
 
     fetchTalents();
+  }, []);
+
+  useEffect(() => {
+    const fetchLikedTalents = async () => {
+      try {
+        const token = localStorage.getItem("jwt");
+        if (!token) return;
+
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/api/v1/liked-talents`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          // Convert the array to Set for O(1) lookups
+          setLikedTalents(new Set(data.map((id) => id.toString())));
+        }
+      } catch (error) {
+        console.error("Error fetching liked talents:", error);
+      }
+    };
+
+    fetchLikedTalents();
   }, []);
 
   useEffect(() => {
@@ -100,20 +135,47 @@ const TalentPage = () => {
   const handleLike = async (talentId, e) => {
     e.stopPropagation();
     try {
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        navigate("/login"); // Redirect to login if not authenticated
+        return;
+      }
+
       const response = await fetch(
-        `http://localhost:5000/api/v1/like-talent/${talentId}`,
+        `${import.meta.env.VITE_BASE_URL}/api/v1/like-talent/${talentId}`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
+
       if (response.ok) {
-        setTalents(
-          talents.map((talent) =>
+        const data = await response.json();
+
+        // Update the talents state with new likes count
+        setTalents((prevTalents) =>
+          prevTalents.map((talent) =>
             talent._id === talentId
-              ? { ...talent, likes: (talent.likes || 0) + 1 }
+              ? { ...talent, likes: data.likesCount }
               : talent
           )
         );
+
+        // Toggle the liked state in the Set
+        setLikedTalents((prevLiked) => {
+          const newLiked = new Set(prevLiked);
+          if (newLiked.has(talentId.toString())) {
+            newLiked.delete(talentId.toString());
+          } else {
+            newLiked.add(talentId.toString());
+          }
+          return newLiked;
+        });
+      } else {
+        throw new Error("Failed to like talent");
       }
     } catch (error) {
       console.error("Error liking talent:", error);
@@ -266,57 +328,41 @@ const TalentPage = () => {
 
   return (
     <div className="min-h-screen ss4 bg-gray-50">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center gap-3">
+      {/* NAVIGATION BAR */}
+      <nav className="bg-white shadow-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between h-14 sm:h-16 items-center">
+            {" "}
+            {/* Reduced height here */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link
-                className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent"
                 to="/"
               >
                 Talentify
               </Link>
             </div>
-
-            <div className="hidden md:flex items-center gap-8">
-              <Link
+            <div className="hidden md:flex items-center gap-4 lg:gap-8">
+              {/* <Link
                 to="/"
-                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+                className="text-gray-700 hover:text-purple-600 text-lg transition-colors"
               >
                 Home
-              </Link>
-              <Link
+              </Link> */}
+              {/* <Link
                 to="/about"
-                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+                className="text-gray-700 hover:text-purple-600 text-lg transition-colors"
               >
                 About
-              </Link>
+              </Link> */}
               <Link
                 to="/register-talent"
-                className="bg-purple-700 text-white px-6 py-2.5 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
+                className="bg-purple-700 text-white px-4 lg:px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
               >
                 Get Hired
               </Link>
-              <Link to="/profile" className="group">
-                <div className="w-11 h-11 rounded-full bg-purple-50 flex items-center justify-center border-2 border-purple-100 group-hover:border-purple-300 transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6 text-purple-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-              </Link>
+              <NavProfileIcon />
             </div>
-
             <button
               className="md:hidden p-2 text-gray-500 hover:bg-purple-50 rounded-lg"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -326,44 +372,38 @@ const TalentPage = () => {
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white shadow-lg">
-            <div className="space-y-2 py-3">
+            <div className="space-y-1 py-2 px-4">
               <Link
                 to="/"
-                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                className="block py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 Home
               </Link>
               <Link
                 to="/about"
-                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                className="block py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
               >
                 About
               </Link>
               <Link
-                to="/profile"
-                className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                to="/register-talent"
+                className="block mt-2 w-full text-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
               >
-                Profile
+                Get Hired
               </Link>
-              <div className="px-4 pt-2">
-                <Link
-                  to="/register-talent"
-                  className="block w-full text-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Join as Talent
-                </Link>
-              </div>
             </div>
           </div>
         )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 `transition-all ${selectedTalent ? 'ml-[33%]' : 'ml-0'}">
         <div
-          className={`transition-all duration-300 ${selectedTalent ? "lg:pr-[33.333333%]" : ""
-            }`}
+          className={`transition-all duration-300 ${
+            selectedTalent ? "lg:pr-[33.333333%]" : ""
+          }`}
         >
           <div className="mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -499,11 +539,20 @@ const TalentPage = () => {
                             <Briefcase size={16} />
                             <span className="font-medium text-sm">Hire</span>
                           </button>
+                          {/* Like  */}
                           <button
-                            className="flex items-center justify-center gap-1 bg-pink-50 text-pink-600 py-3 px-5 rounded-lg hover:bg-pink-100 transition-colors"
+                            className={`flex items-center justify-center gap-1 ${
+                              likedTalents.has(talent._id.toString())
+                                ? "bg-pink-100 text-pink-600"
+                                : "bg-pink-50 text-pink-600"
+                            } py-3 px-5 rounded-lg hover:bg-pink-100 transition-colors`}
                             onClick={(e) => handleLike(talent._id, e)}
                           >
-                            <Heart size={16} />
+                            {likedTalents.has(talent._id.toString()) ? (
+                              <Heart size={16} fill="currentColor" />
+                            ) : (
+                              <Heart size={16} />
+                            )}
                           </button>
                         </div>
 
@@ -562,7 +611,6 @@ const TalentPage = () => {
                 >
                   Next
                 </PaginationButton>
-                
               </div>
             )}
           </div>
@@ -571,7 +619,9 @@ const TalentPage = () => {
           {selectedTalent && (
             <div
               ref={sidePanelRef}
-              className="hidden lg:block fixed right-0 top-20 w-1/3 bg-white border-l border-gray-100 shadow-lg h-[calc(100vh-5rem)] overflow-y-auto p-8"
+              className={`side-panel fixed right-0 top-20 w-1/3 bg-white border-l border-gray-100 shadow-lg h-[calc(100vh-5rem)] overflow-y-auto p-8 ${
+                selectedTalent ? "open" : ""
+              }`}
             >
               <button
                 onClick={() => setSelectedTalent(null)}
