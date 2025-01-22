@@ -42,7 +42,7 @@ if (!phoneRegex.test(phoneno)) {
 
     await newUser.save();
 
-    const token = generateToken(newUser._id,newUser.role,newUser.username,user.email);
+    const token = generateToken(newUser._id,newUser.role,newUser.username,newUser.email);
 
     res.status(201).json({
       _id: newUser._id,

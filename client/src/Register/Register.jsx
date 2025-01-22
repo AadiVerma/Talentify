@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Mail, Lock, User, ArrowRight, Github, Linkedin, Phone } from 'lucide-react';
+import { CheckCircle, Mail, Lock, User, ArrowRight, Phone } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,8 +16,8 @@ const AuthPage = () => {
     e.preventDefault();
 
     const endpoint = isLogin
-      ?  `${import.meta.env.VITE_BASE_URL}/api/v1/login`
-      :  `${import.meta.env.VITE_BASE_URL}/api/v1/signup`;
+      ? `${import.meta.env.VITE_BASE_URL}/api/v1/login`
+      : `${import.meta.env.VITE_BASE_URL}/api/v1/signup`;
 
     const payload = isLogin
       ? { email, password }
@@ -24,29 +25,29 @@ const AuthPage = () => {
           email,
           password,
           username: name,
-          phoneno: phoneNo // Include phone number in signup payload
+          phoneno: phoneNo,
         };
 
     try {
       const response = await axios.post(endpoint, payload);
-      console.log(response, response);
       const token = response.data.token;
 
       if (token) {
         // Store token in localStorage
         localStorage.setItem('jwt', token);
-        alert(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
+        toast.success(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
         navigate('/');
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 500); // Slight delay for toast to display
       }
     } catch (error) {
       console.error('Error during authentication:', error);
-      alert('Authentication failed. Please try again.');
+      toast.error('Authentication failed. Please try again.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="w-full max-w-4xl flex rounded-2xl shadow-2xl overflow-hidden">
         <div className="hidden lg:flex lg:w-1/2 bg-purple-600 p-12 flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
@@ -69,13 +70,9 @@ const AuthPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Decorative Background Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500 rounded-full -mr-32 -mt-32 opacity-50" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-700 rounded-full -ml-24 -mb-24 opacity-50" />
         </div>
-
-        {/* Right Panel - Auth Form */}
         <div className="w-full lg:w-1/2 bg-white p-8 lg:p-12">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
@@ -106,7 +103,6 @@ const AuthPage = () => {
                       />
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Phone Number</label>
                     <div className="relative">
@@ -123,7 +119,6 @@ const AuthPage = () => {
                   </div>
                 </>
               )}
-
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Email</label>
                 <div className="relative">
@@ -138,7 +133,6 @@ const AuthPage = () => {
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Password</label>
                 <div className="relative">
@@ -153,7 +147,6 @@ const AuthPage = () => {
                   />
                 </div>
               </div>
-
               <button
                 type="submit"
                 className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center justify-center space-x-2 group"
@@ -161,7 +154,6 @@ const AuthPage = () => {
                 <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-
               <p className="text-center text-sm text-gray-600">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
                 <button
