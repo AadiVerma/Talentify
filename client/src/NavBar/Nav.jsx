@@ -79,17 +79,21 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
               </a>
               <button
                 onClick={async() => {
-                  const id = getUserId();
-                  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/v1/user/${id}`);
-                  console.log(response);
-                  if (token && !response.data.user.jobseeker) {
-                    navigate(`/${registerlink}`)
-                  }
-                  else if(response.data.user.jobseeker && token){
-                    toast.success("Already register!!");
-                  }
-                  else {
-                    toast.error('Please login First!');
+                  try {
+                    const id = getUserId();
+                    const response = await axios.get(`https://talentify.onrender.com/api/v1/user/${id}`);
+                    console.log(response);
+                    if (token && !response.data.user.jobseeker) {
+                      navigate(`/${registerlink}`)
+                    }
+                    else if (response.data.user.jobseeker && token) {
+                      toast.success("Already register!!");
+                    }
+                    else {
+                      toast.error('Please login First!');
+                    }
+                  } catch (error) {
+                    toast.error("Please login First!")
                   }
                 }}
                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
