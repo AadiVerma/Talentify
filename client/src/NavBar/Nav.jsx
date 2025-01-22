@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import image from '/Avatar.jpg'
 import toast, { Toaster } from 'react-hot-toast'
+import axios from "axios";
 export default function Nav({ homelink, explorelink, aboutlink, contactlink, registerlink }) {
-    const [user, setUser] = useState(null);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const navigate = useNavigate();
-    let token;
+  const [user, setUser] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const navigate = useNavigate();
+  let token;
   useEffect(() => {
     token = localStorage.getItem("jwt");
     if (token) {
@@ -22,7 +23,18 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
       }
     }
   }, []);
- token = localStorage.getItem("jwt");
+  token = localStorage.getItem("jwt");
+  function getUserId() {
+    const token = localStorage.getItem("jwt");
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.userId;
+    } catch (error) {
+      console.error("Invalid JWT:", error.message);
+      return null;
+    }
+  }
   const handleLogout = () => {
     localStorage.removeItem("jwt");
     setUser(null);
@@ -35,7 +47,7 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
   return (
     <>
       <nav className="bg-gray-100/30">
-      {/* <Toaster/> */}
+        {/* <Toaster/> */}
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <Link
@@ -66,11 +78,17 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
                 About
               </a>
               <button
-                onClick={()=>{
-                  if(token){
+                onClick={async() => {
+                  const id = getUserId();
+                  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/v1/user/${id}`);
+                  console.log(response);
+                  if (token && !response.data.user.jobseeker) {
                     navigate(`/${registerlink}`)
                   }
-                  else{
+                  else if(response.data.user.jobseeker && token){
+                    toast.success("Already register!!");
+                  }
+                  else {
                     toast.error('Please login First!');
                   }
                 }}
@@ -159,11 +177,11 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
               About
             </Link>
             <button
-              onClick={()=>{
-                if(token){
+              onClick={() => {
+                if (token) {
                   navigate(`/${registerlink}`)
                 }
-                else{
+                else {
                   toast.error("Please Login First!")
                 }
                 setIsDrawerOpen(false)
