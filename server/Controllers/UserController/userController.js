@@ -1,27 +1,22 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import User from "../../Models/UserModel.js"; 
-;
-const generateToken = (userId, role, username,email) => {
-  return jwt.sign({ userId, role, username ,email}, process.env.JWT_SECRET, {
+import User from "../../Models/UserModel.js";
+import JobSeeker from "../../Models/JobSeeker.js";
+const generateToken = (userId, role, username, email) => {
+  return jwt.sign({ userId, role, username, email }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
 };
 
 const signupController = async (req, res) => {
   try {
-
     const { username, email, password, phoneno } = req.body;
 
-    if(!username||!email || !password || !phoneno ){
-        return res.status(400).json({ error: "fill all details" });
+    if (!username || !email || !password || !phoneno) {
+      return res.status(400).json({ error: "fill all details" });
     }
-    const phoneRegex = /^[6-9]\d{9}$/; 
-if (!phoneRegex.test(phoneno)) {
-  return res.status(400).json({ error: "Invalid phone number" });
-}
-
-    if (typeof phoneno !== "string" || !phoneRegex.test(phoneno.trim())) {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phoneno)) {
       return res.status(400).json({ error: "Invalid phone number" });
     }
 
@@ -29,7 +24,10 @@ if (!phoneRegex.test(phoneno)) {
       return res.status(400).json({ error: "Invalid phone number" });
     }
 
-    
+    if (typeof phoneno !== "string" || !phoneRegex.test(phoneno.trim())) {
+      return res.status(400).json({ error: "Invalid phone number" });
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: "Username already exists" });
@@ -44,11 +42,15 @@ if (!phoneRegex.test(phoneno)) {
       password: hashedPassword,
       phoneno,
     });
-    
 
     await newUser.save();
 
-    const token = generateToken(newUser._id, newUser.role, newUser.username,newUser.email);
+    const token = generateToken(
+      newUser._id,
+      newUser.role,
+      newUser.username,
+      newUser.email
+    );
 
     res.status(201).json({
       _id: newUser._id,
@@ -79,7 +81,7 @@ const loginController = async (req, res) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    const token = generateToken(user._id, user.role, user.username,user.email);
+    const token = generateToken(user._id, user.role, user.username, user.email);
 
     res.status(200).json({
       _id: user._id,
@@ -220,13 +222,15 @@ const handleLikeTalent = async (req, res) => {
       message: isLiked ? "Successfully unliked" : "Successfully liked",
     });
   } catch (error) {
-    console.error("Error in handleLikeTalent:", error.message);
+    // console.error("Error in handleLikeTalent:", error.message);
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ error: "Invalid token" });
     }
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 export {
   loginController,

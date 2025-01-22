@@ -67,6 +67,7 @@ const RegisterController = async (req, res) => {
       skills: JSON.parse(skills), // Parse the skills array from form data
       experience: Number(experience),
       profilepic: photoUrl, // Save the Cloudinary URL to the profilepic field
+      user: userId,
     });
 
     user.jobseeker = newJobSeeker._id;

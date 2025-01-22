@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,6 +18,7 @@ import {
 import NavProfileIcon from "./NavProfileIcon";
 
 import { jwtDecode } from "jwt-decode";
+import LikeButton from "./LikeButton";
 
 function isAdmin() {
   const token = localStorage.getItem("jwt");
@@ -53,6 +55,31 @@ const PaginationButton = ({ children, onClick, disabled, active }) => (
     {children}
   </button>
 );
+
+function isJobSeeker() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    console.log(payload.jobseekerId);
+    return Boolean(payload.jobseekerId);
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return false;
+  }
+}
+function getUserId() {
+  const token = localStorage.getItem("jwt");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.userId; // Get userId from JWT payload
+  } catch (error) {
+    console.error("Invalid JWT:", error.message);
+    return null;
+  }
+}
+
 const TalentPage = () => {
   const [talents, setTalents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,12 +88,17 @@ const TalentPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState(null);
   const sidePanelRef = useRef(null);
+  const [isUserJobSeeker, setIsUserJobSeeker] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const profilesPerPage = 15;
   const [likedTalents, setLikedTalents] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadingLikes, setLoadingLikes] = useState(new Set());
 
   const navigate = useNavigate();
+
   useEffect(() => {
     if (isAdmin()) {
       navigate("/");
@@ -87,6 +119,69 @@ const TalentPage = () => {
   }, []);
 
   useEffect(() => {
+    const checkJobSeekerStatus = async () => {
+      const userId = getUserId(); // Assume getUserId fetches the user ID from the token or state
+      if (!userId) return;
+
+      try {
+        const token = localStorage.getItem("jwt");
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/api/v1/user/${userId}`, // Fixed URL format
+          {
+            method: "GET", // Changed to GET since we're fetching data
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            // Removed body since it's a GET request and userId is in URL
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsUserJobSeeker(Boolean(data.user.jobseeker)); // Updated to match response structure
+        }
+      } catch (error) {
+        console.error("Error checking jobseeker status:", error);
+      }
+    };
+
+    checkJobSeekerStatus();
+  }, []);
+
+  const renderGetHiredButton = () => {
+    if (isUserJobSeeker) {
+      return (
+        <button
+          disabled
+          className="bg-gray-300 text-gray-500 px-4 lg:px-6 py-2 rounded-lg cursor-not-allowed font-medium"
+          title="You are already registered as a talent"
+        >
+          Get Hired
+        </button>
+      );
+    }
+
+    const handlehireclick = () => {
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        navigate("/register");
+      } else {
+        navigate("/register-talent");
+      }
+    };
+
+    return (
+      <button
+        className="bg-purple-700 text-white px-4 lg:px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
+        onClick={handlehireclick}
+      >
+        Get Hired
+      </button>
+    );
+  };
+
+  useEffect(() => {
     const fetchLikedTalents = async () => {
       try {
         const token = localStorage.getItem("jwt");
@@ -101,13 +196,16 @@ const TalentPage = () => {
           }
         );
 
-        if (response.ok) {
-          const data = await response.json();
-          // Convert the array to Set for O(1) lookups
-          setLikedTalents(new Set(data.map((id) => id.toString())));
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch liked talents");
         }
+
+        const data = await response.json();
+        setLikedTalents(new Set(data.map((id) => id.toString())));
       } catch (error) {
         console.error("Error fetching liked talents:", error);
+        setError(error.message);
       }
     };
 
@@ -132,12 +230,14 @@ const TalentPage = () => {
     };
   }, [selectedTalent]);
 
-  const handleLike = async (talentId, e) => {
-    e.stopPropagation();
+  const handleLike = async (talentId) => {
+    setIsLoading(true);
+    setError(null);
+
     try {
       const token = localStorage.getItem("jwt");
       if (!token) {
-        navigate("/login"); // Redirect to login if not authenticated
+        navigate("/register");
         return;
       }
 
@@ -152,33 +252,40 @@ const TalentPage = () => {
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-
-        // Update the talents state with new likes count
-        setTalents((prevTalents) =>
-          prevTalents.map((talent) =>
-            talent._id === talentId
-              ? { ...talent, likes: data.likesCount }
-              : talent
-          )
-        );
-
-        // Toggle the liked state in the Set
-        setLikedTalents((prevLiked) => {
-          const newLiked = new Set(prevLiked);
-          if (newLiked.has(talentId.toString())) {
-            newLiked.delete(talentId.toString());
-          } else {
-            newLiked.add(talentId.toString());
-          }
-          return newLiked;
-        });
-      } else {
-        throw new Error("Failed to like talent");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update like status");
       }
+
+      const data = await response.json();
+
+      setTalents((prevTalents) =>
+        prevTalents.map((talent) =>
+          talent._id === talentId
+            ? { ...talent, likes: data.likesCount }
+            : talent
+        )
+      );
+
+      setLikedTalents((prev) => {
+        const newLiked = new Set(prev);
+        if (data.isLiked) {
+          newLiked.add(talentId.toString());
+        } else {
+          newLiked.delete(talentId.toString());
+        }
+        return newLiked;
+      });
     } catch (error) {
       console.error("Error liking talent:", error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+      setLoadingLikes((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(talentId);
+        return newSet;
+      });
     }
   };
 
@@ -203,8 +310,23 @@ const TalentPage = () => {
   };
 
   const handleHire = async (talentId) => {
-    // Implement hire functionality
-    console.log("Hiring talent:", talentId);
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      // Navigate to login if no token is found
+      navigate("/register");
+      return;
+    }
+
+    try {
+      // Simulate sending a hire request
+      console.log("Hiring talent:", talentId);
+
+      // Show a success toast
+      toast.success("Hire request sent to admin!");
+    } catch (error) {
+      console.error("Error sending hire request:", error);
+      toast.error("Failed to send hire request. Please try again.");
+    }
   };
 
   const handleImageError = (e) => {
@@ -299,6 +421,7 @@ const TalentPage = () => {
 
     return pageNumbers;
   };
+
   const renderPaginationButtons = () => {
     const pageNumbers = getPageNumbers();
 
@@ -343,24 +466,7 @@ const TalentPage = () => {
               </Link>
             </div>
             <div className="hidden md:flex items-center gap-4 lg:gap-8">
-              {/* <Link
-                to="/"
-                className="text-gray-700 hover:text-purple-600 text-lg transition-colors"
-              >
-                Home
-              </Link> */}
-              {/* <Link
-                to="/about"
-                className="text-gray-700 hover:text-purple-600 text-lg transition-colors"
-              >
-                About
-              </Link> */}
-              <Link
-                to="/register-talent"
-                className="bg-purple-700 text-white px-4 lg:px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm hover:shadow-md"
-              >
-                Get Hired
-              </Link>
+              {renderGetHiredButton()}
               <NavProfileIcon />
             </div>
             <button
@@ -540,20 +646,12 @@ const TalentPage = () => {
                             <span className="font-medium text-sm">Hire</span>
                           </button>
                           {/* Like  */}
-                          <button
-                            className={`flex items-center justify-center gap-1 ${
-                              likedTalents.has(talent._id.toString())
-                                ? "bg-pink-100 text-pink-600"
-                                : "bg-pink-50 text-pink-600"
-                            } py-3 px-5 rounded-lg hover:bg-pink-100 transition-colors`}
-                            onClick={(e) => handleLike(talent._id, e)}
-                          >
-                            {likedTalents.has(talent._id.toString()) ? (
-                              <Heart size={16} fill="currentColor" />
-                            ) : (
-                              <Heart size={16} />
-                            )}
-                          </button>
+                          <LikeButton
+                            talent={talent}
+                            onLike={handleLike}
+                            isLiked={likedTalents.has(talent._id.toString())}
+                            isLoading={loadingLikes.has(talent._id)}
+                          />
                         </div>
 
                         <div className="flex justify-between text-xs text-gray-500">
@@ -692,20 +790,13 @@ const TalentPage = () => {
               </div>
 
               {/* Contact Actions */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 pl-40 ">
                 <button
-                  className="flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md"
+                  className="flex  items-center justify-center gap-2 bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors shadow-sm hover:shadow-md"
                   onClick={() => handleHire(selectedTalent._id)}
                 >
                   <Briefcase size={16} />
                   <span className="font-medium text-sm">Hire Now</span>
-                </button>
-                <button
-                  className="flex items-center justify-center gap-2 bg-purple-50 text-purple-600 py-3 px-4 rounded-lg hover:bg-purple-100 transition-colors"
-                  onClick={(e) => handleLike(selectedTalent._id, e)}
-                >
-                  <Heart size={16} />
-                  <span className="font-medium text-sm">Like Profile</span>
                 </button>
               </div>
             </div>
