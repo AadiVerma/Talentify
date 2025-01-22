@@ -96,7 +96,6 @@ const GetTalentsController = async (req, res) => {
       .json({ message: "Failed to fetch talents", error: error.message });
   }
 };
-
 const GetTalentsNotApproved = async (req, res) => {
   try {
     const talents = await JobSeeker.find({ approve: false });
