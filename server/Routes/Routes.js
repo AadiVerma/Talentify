@@ -3,6 +3,7 @@ import {
   RegisterController,
   GetTalentsController, GetTalentsNotApproved, UpdateJobSeekerApproval,
 } from "../Controllers/registercontrollers/RegisterController.js";
+import  SendMails from "../Controllers/mailcontroller/MailController.js";
 import upload from "../Config/multer.js";
 import { getCountsData } from "../Controllers/AdminController.js/AdminController.js";
 import { loginController, signupController } from "../Controllers/UserController/userController.js";
@@ -17,7 +18,7 @@ router.route("/update-talent").post(UpdateJobSeekerApproval)
 router.route("/signup").post(signupController)
 router.route("/login").post(loginController)
 
-
+router.route("/contact-us").post(SendMails);  
 
 
 

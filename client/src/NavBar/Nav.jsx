@@ -30,7 +30,7 @@ export default function Nav({ homelink, explorelink, aboutlink, contactlink, reg
 
     return (
         <>
-            <nav className="bg-white shadow-md">
+            <nav className="bg-gray-100/30">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex justify-between items-center h-16">
                         <h1 className="text-3xl font-bold text-purple-800">Talentify</h1>

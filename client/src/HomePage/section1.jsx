@@ -25,9 +25,9 @@ export default function Page1() {
             </div>
 
             <div className="absolute inset-0 -z-10 flex justify-center items-center">
-                <div className="absolute bg-purple-600/5 blur-xl w-96 h-96 rounded-full" style={{ top: '50%', left: '37%' }}></div>
-                <div className="absolute bg-purple-600/5 blur-xl w-96 h-96 rounded-full" style={{ top: '0%', right: '3%' }}></div>
-                <div className="absolute bg-purple-600/5 blur-xl w-96 h-96 rounded-full" style={{ top: '0%', left: '0%' }}></div>
+                <div className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full" style={{ top: '50%', left: '37%' }}></div>
+                <div className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full" style={{ top: '0%', right: '3%' }}></div>
+                <div className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full" style={{ top: '0%', left: '0%' }}></div>
             </div>
 
             <div className='flex justify-center relative'>

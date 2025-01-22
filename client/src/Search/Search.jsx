@@ -7,8 +7,6 @@ export default function SearchBar() {
     const categories = [
         { value: 'Name', label: 'Name' },
         { value: 'Skill', label: 'Skill' },
-        { value: 'Location', label: 'Location' },
-        { value: 'Experience', label: 'Experience' },
     ];
 
     const handleSearchTermChange = (e) => {

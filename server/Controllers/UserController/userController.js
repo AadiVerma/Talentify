@@ -1,27 +1,30 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import User from "../../Models/UserModel.js"; // Adjust the path to your User model
-console.log(process.env.JWT_SECRET)
-const generateToken = (userId,role,username) => {
-  return jwt.sign({ userId ,role,username}, process.env.JWT_SECRET, {
-    expiresIn: "7d", // Token expires in 7 days
+import User from "../../Models/UserModel.js"; 
+
+const generateToken = (userId,role,username,email) => {
+  return jwt.sign({ userId ,role,username,email}, process.env.JWT_SECRET, {
+    expiresIn: "7d",
   });
 };
 
  const signupController = async (req, res) => {
   try {
-    console.log("efefe",req.body)
 
     const { username, email, password,phoneno } = req.body;
 
     if(!username||!email || !password || !phoneno ){
         return res.status(400).json({ error: "fill all details" });
     }
-    
-    const phoneRegex = /^[6-9]\\d{9}$/;
-    if (!phoneRegex.test(phoneno)) {
+    const phoneRegex = /^[6-9]\d{9}$/; 
+if (!phoneRegex.test(phoneno)) {
+  return res.status(400).json({ error: "Invalid phone number" });
+}
+
+    if (typeof phoneno !== "string" || !phoneRegex.test(phoneno.trim())) {
       return res.status(400).json({ error: "Invalid phone number" });
     }
+    
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: "Username already exists" });
@@ -36,11 +39,10 @@ const generateToken = (userId,role,username) => {
       password: hashedPassword,
       phoneno
     });
-    console.log(newUser)
 
     await newUser.save();
 
-    const token = generateToken(newUser._id,newUser.role,newUser.username);
+    const token = generateToken(newUser._id,newUser.role,newUser.username,user.email);
 
     res.status(201).json({
       _id: newUser._id,
@@ -58,7 +60,6 @@ const generateToken = (userId,role,username) => {
   try {
     const { email, password } = req.body;
 
-    // Find the user by username
     if(!email || !password ){
         return res.status(400).json({ error: "fill all details" });
     }    
@@ -72,7 +73,7 @@ const generateToken = (userId,role,username) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    const token = generateToken(user._id,user.role,user.username);
+    const token = generateToken(user._id,user.role,user.username,user.email);
 
     res.status(200).json({
       _id: user._id,

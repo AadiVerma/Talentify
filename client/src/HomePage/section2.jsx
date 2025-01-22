@@ -54,12 +54,16 @@ export default function Section2() {
 
             {/* Background Blur Elements */}
             <div className="absolute inset-0 -z-20">
+            <div
+                    className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full"
+                    style={{ top: "10%", left: "0%" }}
+                ></div>
                 <div
-                    className="absolute bg-purple-600/5 blur-xl w-96 h-96 rounded-full"
+                    className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full"
                     style={{ top: "50%", left: "30%" }}
                 ></div>
                 <div
-                    className="absolute bg-purple-600/5 blur-xl w-96 h-96 rounded-full"
+                    className="absolute bg-purple-600/15 blur-xl w-96 h-96 rounded-full"
                     style={{ top: "10%", right: "5%" }}
                 ></div>
             </div>
