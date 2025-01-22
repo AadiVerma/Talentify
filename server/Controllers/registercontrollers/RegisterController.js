@@ -8,10 +8,22 @@ const bufferToStream = (buffer) => {
 };
 
 const RegisterController = async (req, res) => {
-  const { firstname, lastname, description, email, skills, experience } =
-    req.body;
+  const {
+    firstname,
+    lastname,
+    description,
+    email,
+    skills,
+    experience,
+    userId,
+  } = req.body;
   console.log(req.body);
   const file = req.file; // Image file from multer
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
   try {
     // Handle photo upload to Cloudinary
@@ -57,6 +69,10 @@ const RegisterController = async (req, res) => {
       profilepic: photoUrl, // Save the Cloudinary URL to the profilepic field
     });
 
+    user.jobseeker = newJobSeeker._id;
+    user.role = "job-seeker"; // Update role if needed
+    await user.save();
+
     await newJobSeeker.save();
 
     res.status(201).json({
@@ -89,12 +105,10 @@ const GetTalentsNotApproved = async (req, res) => {
     const talents = await JobSeeker.find({ approve: false });
     res.status(200).json({ approved: false, talents });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch not approved talents",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to fetch not approved talents",
+      error: error.message,
+    });
   }
 };
 

@@ -1,7 +1,7 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft ,Upload } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
 function isAdmin() {
   const token = localStorage.getItem("jwt");
   if (!token) return false;
@@ -150,7 +150,7 @@ function RegisterTalent() {
     if (isAdmin()) {
       navigate("/");
     }
-  },[])
+  }, []);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -181,6 +181,18 @@ function RegisterTalent() {
     }
   };
 
+  function getUserId() {
+    const token = localStorage.getItem("jwt");
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.userId; // Assuming your JWT payload contains userId
+    } catch (error) {
+      console.error("Invalid JWT:", error.message);
+      return null;l
+    }
+  }
+
   const validateForm = () => {
     if (!formData.firstName.trim()) return "First name is required";
     if (!formData.lastName.trim()) return "Last name is required";
@@ -194,6 +206,11 @@ function RegisterTalent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); // Clear previous errors
+    const userId = getUserId();
+    if (!userId) {
+      setError("User authentication required");
+      return;
+    }
 
     const validationError = validateForm();
     if (validationError) {
@@ -210,6 +227,7 @@ function RegisterTalent() {
       formDataToSend.append("skills", JSON.stringify(formData.skills));
       formDataToSend.append("experience", Number(formData.experience));
       formDataToSend.append("description", formData.description.trim());
+      formDataToSend.append("userId", userId); // Add userId to form data
 
       if (formData.photo) {
         formDataToSend.append("profilephoto", formData.photo);
@@ -221,19 +239,17 @@ function RegisterTalent() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
           },
           validateStatus: function (status) {
-            return status >= 200 && status < 500; // Handle HTTP errors properly
+            return status >= 200 && status < 500;
           },
         }
       );
 
       if (response.status === 201 || response.status === 200) {
-        // Success case
         setTimeout(() => navigate("/talent-page"), 500);
       } else {
-        // Handle other status codes
-        setTimeout(() => navigate("/talent-page"), 500);
         throw new Error(response.data.message || "Registration failed");
       }
     } catch (error) {

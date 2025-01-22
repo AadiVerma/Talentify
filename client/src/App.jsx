@@ -1,12 +1,18 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import TalentPage from "./TalentPage/TalentPage.jsx";
 import RegisterTalent from "./TalentPage/RegisterTalent.jsx";
-import Admin from './AdminPanel/Admin';
-import PendingRequest from './AdminPanel/pages/PendingRequest';
+import Admin from "./AdminPanel/Admin";
+import PendingRequest from "./AdminPanel/pages/PendingRequest";
 import DashBoard from "./AdminPanel/pages/DashBoard";
 import Home from "./HomePage/Home.jsx";
-import Register from "./Register/Register.jsx"
+import Register from "./Register/Register.jsx";
+import Section3 from "./HomePage/section3.jsx";
 
 function isAdmin() {
   const token = localStorage.getItem("jwt");
@@ -39,7 +45,7 @@ function App() {
         <Route path="/talents" element={<TalentPage />} />
         <Route path="/register-talent" element={<RegisterTalent />} />
         <Route path="/register" element={<Register />} />
-
+        
       </Routes>
     </Router>
   );
