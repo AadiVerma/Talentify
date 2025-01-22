@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,useLocation} from "react-router-dom";
 import {
   Search,
   Briefcase,
@@ -81,6 +81,7 @@ function getUserId() {
 }
 
 const TalentPage = () => {
+  const location = useLocation(); 
   const [talents, setTalents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
@@ -89,7 +90,11 @@ const TalentPage = () => {
   const [selectedTalent, setSelectedTalent] = useState(null);
   const sidePanelRef = useRef(null);
   const [isUserJobSeeker, setIsUserJobSeeker] = useState(false);
-
+  useEffect(() => {
+    const { searchQuery1 } = location.state || {};
+    console.log(searchQuery1)
+    setSearchQuery(searchQuery1?searchQuery1:""); 
+  }, [location.state]); 
   const [currentPage, setCurrentPage] = useState(1);
   const profilesPerPage = 15;
   const [likedTalents, setLikedTalents] = useState(new Set());
@@ -526,6 +531,7 @@ const TalentPage = () => {
                   type="text"
                   placeholder="Search by name, skill, or expertise..."
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
                   className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm"
                 />
                 <Search

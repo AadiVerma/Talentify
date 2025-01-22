@@ -2,11 +2,11 @@ import User from "../../Models/UserModel.js";
 import JobSeeker from "../../Models/JobSeeker.js";
 import cloudinary from "../../Config/cloudinary.js";
 import { Readable } from "stream";
+import { SendAdminRequest } from "../../Services/AdminRequest.js";
 
 const bufferToStream = (buffer) => {
   return Readable.from(buffer);
 };
-
 const RegisterController = async (req, res) => {
   const {
     firstname,
@@ -18,7 +18,7 @@ const RegisterController = async (req, res) => {
     userId,
   } = req.body;
   console.log(req.body);
-  const file = req.file; // Image file from multer
+  const file = req.file;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -26,7 +26,6 @@ const RegisterController = async (req, res) => {
   }
 
   try {
-    // Handle photo upload to Cloudinary
     let photoUrl = null;
     if (file) {
       try {
@@ -57,25 +56,22 @@ const RegisterController = async (req, res) => {
         return res.status(500).json({ message: "Failed to upload image" });
       }
     }
-
-    // Create a new JobSeeker with the photo URL
     const newJobSeeker = new JobSeeker({
       firstname,
       lastname,
       description,
       email,
-      skills: JSON.parse(skills), // Parse the skills array from form data
+      skills: JSON.parse(skills),
       experience: Number(experience),
       profilepic: photoUrl, // Save the Cloudinary URL to the profilepic field
       user: userId,
     });
 
     user.jobseeker = newJobSeeker._id;
-    user.role = "job-seeker"; // Update role if needed
+    user.role = "job-seeker"; 
     await user.save();
-
     await newJobSeeker.save();
-
+    SendAdminRequest({name:firstname+" "+lastname,email:email,skills:skills,description});
     res.status(201).json({
       message: "Job Seeker added successfully",
       jobseeker: newJobSeeker,

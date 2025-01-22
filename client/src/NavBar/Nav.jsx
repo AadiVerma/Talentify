@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
-import image from "/image7.png";
-export default function Nav({
-  homelink,
-  explorelink,
-  aboutlink,
-  contactlink,
-  registerlink,
-}) {
-  const [user, setUser] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const navigate = useNavigate();
-
+import image from '/Avatar.jpg'
+import toast, { Toaster } from 'react-hot-toast'
+export default function Nav({ homelink, explorelink, aboutlink, contactlink, registerlink }) {
+    const [user, setUser] = useState(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const navigate = useNavigate();
+    let token;
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
+    token = localStorage.getItem("jwt");
     if (token) {
       try {
         const userData = JSON.parse(atob(token.split(".")[1]));
@@ -27,16 +22,20 @@ export default function Nav({
       }
     }
   }, []);
-
+ token = localStorage.getItem("jwt");
   const handleLogout = () => {
     localStorage.removeItem("jwt");
     setUser(null);
+    toast('Log Out SuccessFully!', {
+      icon: '☠️',
+    });
     navigate("/");
   };
 
   return (
     <>
       <nav className="bg-gray-100/30">
+      {/* <Toaster/> */}
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <Link
@@ -66,12 +65,19 @@ export default function Nav({
               >
                 About
               </a>
-              <Link
-                to={`/${registerlink}`}
+              <button
+                onClick={()=>{
+                  if(token){
+                    navigate(`/${registerlink}`)
+                  }
+                  else{
+                    toast.error('Please login First!');
+                  }
+                }}
                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
               >
-                Register
-              </Link>
+                Apply
+              </button>
               <a
                 href={`/${contactlink}`}
                 className="text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
@@ -152,13 +158,21 @@ export default function Nav({
             >
               About
             </Link>
-            <Link
-              to={`/${registerlink}`}
+            <button
+              onClick={()=>{
+                if(token){
+                  navigate(`/${registerlink}`)
+                }
+                else{
+                  toast.error("Please Login First!")
+                }
+                setIsDrawerOpen(false)
+              }}
+
               className="block text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"
-              onClick={() => setIsDrawerOpen(false)}
             >
-              Register
-            </Link>
+              Apply
+            </button>
             <Link
               to={`/${contactlink}`}
               className="block text-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 px-3 py-2 rounded-md"

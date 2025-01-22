@@ -22,7 +22,7 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("jwt"); 
-    navigate("/signup");
+    navigate("/register");
   };
 
   useEffect(() => {
