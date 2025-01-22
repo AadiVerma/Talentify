@@ -10,7 +10,10 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+  const [userDetails, setUserDetails] = useState({ username: "", email: "" });
 
+
+  const count=2;
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setSidebarOpen(false);
@@ -34,8 +37,35 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
 
   const menus = [
     { name: "DashBoard", link: "/admin/dashboard", icon: MdOutlineDashboard },
-    { name: "Pending Request", link: "/admin/pending-req", icon: PiChatsBold, count: 12 },
+    { name: "Pending Request", link: "/admin/pending-req", icon: PiChatsBold, count: count },
   ];
+
+ 
+  useEffect(() => {
+    const getUserDetailsFromJWT = () => {
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        console.error("JWT not found in local storage");
+        return null;
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return {
+          username: payload.username || null,
+          email: payload.email || null,
+        };
+      } catch (error) {
+        console.error("Invalid JWT:", error.message);
+        return null;
+      }
+    };
+
+    const extractedDetails = getUserDetailsFromJWT();
+    if (extractedDetails) {
+      setUserDetails(extractedDetails);
+    }
+  }, []); 
 
   return (
     <div
@@ -47,8 +77,8 @@ const Sidebar = ({ setSidebarOpen, sidebarOpen }) => {
       <div className="flex items-start justify-between py-3 mb-6">
         {sidebarOpen && (
           <div className="flex flex-col mt-3 pl-2 text-left">
-            <span className="font-bold text-purple-700">Username</span>
-            <span className="text-sm text-gray-500">email@example.com</span>
+            <span className="font-bold text-purple-700">{userDetails.username}</span>
+            <span className="text-sm text-gray-500">{userDetails.email}</span>
           </div>
         )}
         <HiMenuAlt3

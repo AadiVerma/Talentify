@@ -1,40 +1,21 @@
 import JobSeeker from "../../Models/JobSeeker.js";
 
-import User from "../../Models/UserModel.js";
 
 const getCountsData = async (req, res) => {
   try {
-    const hiredCount = await User.countDocuments({
-      role: "hirer",
-      status: "hired",
+    const hiredCount = await JobSeeker.countDocuments({
+    
+      approve: true,
     });
 
-    const talentReqCount = await User.countDocuments({
-      role: "job-seeker",
-      status: "pending",
-    });
-
-    const orgReqCount = await User.countDocuments({
-      role: "hirer",
-      status: "pending",
-    });
-
-    const pendingCount = await User.countDocuments({
-      role: "hirer",
-      status: "pending",
-    });
-
-    const rejectedCount = await User.countDocuments({
-      role: "hirer",
-      status: "rejected",
+    const pendingCount = await JobSeeker.countDocuments({
+    
+      approve: false,
     });
 
     res.json({
       totalHired: hiredCount,
-      totalTalentReq: talentReqCount,
-      totalOrgReq: orgReqCount,
       totalPending: pendingCount,
-      totalRejected: rejectedCount,
     });
   } catch (err) {
     console.error(err);
@@ -42,5 +23,42 @@ const getCountsData = async (req, res) => {
   }
 };
 
+const SkillData= async (req,res)=>{
+  try {
+   
+    const topSkills = await JobSeeker.aggregate([
+      { $unwind: "$skills" }, 
+      {
+        $group: {
+          _id: "$skills", 
+          count: { $sum: 1 }, 
+        },
+      },
+      { $sort: { count: -1 } }, 
+      { $limit: 5 },
+      {
+        $project: {
+          skill: "$_id",
+          count: 1, 
+          _id: 0,
+        },
+      },
+    ]);
 
-export  {getCountsData};
+    res.status(200).json({
+      success: true,
+      data: topSkills,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching top skills.",
+      error: error.message,
+    });
+}
+}
+
+
+
+export  {getCountsData,SkillData};

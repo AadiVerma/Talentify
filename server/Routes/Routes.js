@@ -5,7 +5,7 @@ import {
 } from "../Controllers/registercontrollers/RegisterController.js";
 import  SendMails from "../Controllers/mailcontroller/MailController.js";
 import upload from "../Config/multer.js";
-import { getCountsData } from "../Controllers/AdminController.js/AdminController.js";
+import { getCountsData, SkillData } from "../Controllers/AdminController.js/AdminController.js";
 import { loginController, signupController } from "../Controllers/UserController/userController.js";
 const router = new Router();
 
@@ -24,5 +24,6 @@ router.route("/contact-us").post(SendMails);
 
 // Endpoint to get all counts
 router.get('/status-counts', getCountsData);
+router.get('/skill-data',SkillData)
 
 export default router;

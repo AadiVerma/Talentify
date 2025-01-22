@@ -167,7 +167,6 @@ const ClientRequestsPage = () => {
 
   const handleAccept = async (id) => {
     try {
-      console.log("id",id)
       await axios.post(`${import.meta.env.VITE_BASE_URL}/api/v1/update-talent`, {
         approve: true,
         id: id
@@ -184,7 +183,7 @@ const ClientRequestsPage = () => {
   
   const handleReject = async (id) => {
     try {
-      await axios.post( `${import.meta.env.VITE_BASE_URL}/api/v1/update-talent`, {
+    const response=  await axios.post( `${import.meta.env.VITE_BASE_URL}/api/v1/update-talent`, {
         approve: false,
         id: id
       });      
