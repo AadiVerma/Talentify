@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
+import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { useNavigate ,useLocation} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   Briefcase,
@@ -81,7 +81,7 @@ function getUserId() {
 }
 
 const TalentPage = () => {
-  const location = useLocation(); 
+  const location = useLocation();
   const [talents, setTalents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
@@ -92,9 +92,9 @@ const TalentPage = () => {
   const [isUserJobSeeker, setIsUserJobSeeker] = useState(false);
   useEffect(() => {
     const { searchQuery1 } = location.state || {};
-    console.log(searchQuery1)
-    setSearchQuery(searchQuery1?searchQuery1:""); 
-  }, [location.state]); 
+    console.log(searchQuery1);
+    setSearchQuery(searchQuery1 ? searchQuery1 : "");
+  }, [location.state]);
   const [currentPage, setCurrentPage] = useState(1);
   const profilesPerPage = 15;
   const [likedTalents, setLikedTalents] = useState(new Set());
@@ -160,7 +160,7 @@ const TalentPage = () => {
         <button
           disabled
           className="bg-gray-300 text-gray-500 px-4 lg:px-6 py-2 rounded-lg cursor-not-allowed font-medium"
-          title="You are already registered as a talent"
+          title="Your talent profile is already registered"
         >
           Get Hired
         </button>
@@ -295,23 +295,7 @@ const TalentPage = () => {
   };
 
   const handleView = async (talent) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/v1/increment-view/${talent._id}`,
-        {
-          method: "POST",
-        }
-      );
-      if (response.ok) {
-        setTalents(
-          talents.map((t) =>
-            t._id === talent._id ? { ...t, views: (t.views || 0) + 1 } : t
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error incrementing view:", error);
-    }
+   
   };
 
   const handleHire = async (talentId) => {
@@ -427,6 +411,10 @@ const TalentPage = () => {
     return pageNumbers;
   };
 
+  const handlecase = () => {
+    toast.success("Hire request sent to admin!!");
+  };
+
   const renderPaginationButtons = () => {
     const pageNumbers = getPageNumbers();
 
@@ -456,6 +444,7 @@ const TalentPage = () => {
 
   return (
     <div className="min-h-screen ss4 bg-gray-50">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* NAVIGATION BAR */}
       <nav className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
@@ -547,7 +536,6 @@ const TalentPage = () => {
               >
                 <option value="experience">Sort by Experience</option>
                 <option value="likes">Sort by Likes</option>
-                <option value="views">Sort by Views</option>
               </select>
             </div>
           </div>
@@ -649,7 +637,12 @@ const TalentPage = () => {
                             }}
                           >
                             <Briefcase size={16} />
-                            <span className="font-medium text-sm">Hire</span>
+                            <span
+                              className="font-medium text-sm"
+                              onClick={handlecase}
+                            >
+                              Hire
+                            </span>
                           </button>
                           {/* Like  */}
                           <LikeButton
@@ -658,17 +651,6 @@ const TalentPage = () => {
                             isLiked={likedTalents.has(talent._id.toString())}
                             isLoading={loadingLikes.has(talent._id)}
                           />
-                        </div>
-
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span className="flex items-center gap-1.5">
-                            <Heart size={12} />
-                            {talent.likes || 0} likes
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Eye size={12} />
-                            {talent.views || 0} views
-                          </span>
                         </div>
                       </div>
                     </div>

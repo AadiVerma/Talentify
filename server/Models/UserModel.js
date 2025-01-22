@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema({
   jobseeker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "JobSeeker",
-    
   },
   status: {
     type: String,

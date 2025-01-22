@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 function isAdmin() {
   const token = localStorage.getItem("jwt");
   if (!token) return false;
@@ -189,7 +190,8 @@ function RegisterTalent() {
       return payload.userId; // Assuming your JWT payload contains userId
     } catch (error) {
       console.error("Invalid JWT:", error.message);
-      return null;l
+      return null;
+      l;
     }
   }
 
@@ -264,6 +266,10 @@ function RegisterTalent() {
     }
   };
 
+  const handlecase = () => {
+    toast.success("Profile sent for approval!!");
+  };
+
   const handleSkillSelect = (skill) => {
     if (!formData.skills.includes(skill)) {
       setFormData((prevState) => ({
@@ -284,6 +290,7 @@ function RegisterTalent() {
 
   return (
     <div className="h-screen bg-gradient-to-b ss4 from-purple-50 to-white">
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="h-full flex flex-col">
         <header className="bg-gradient-to-b from-purple-50 to-purple-50/95 backdrop-blur-sm z-50 py-3 px-6">
           <Link
@@ -500,7 +507,7 @@ function RegisterTalent() {
                   />
                 </div>
 
-                <div className="col-span-2 mt-2">
+                <div className="col-span-2 mt-2" onClick={handlecase}>
                   <button
                     type="submit"
                     disabled={isSubmitting}
