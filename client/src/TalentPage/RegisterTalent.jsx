@@ -296,12 +296,12 @@ function RegisterTalent() {
         </header>
 
         <div className="flex-1 px-4">
-          <div className="max-w-3xl mx-auto h-full">
-            <div className="text-center mb-2">
-              <h1 className="text-xl font-bold text-purple-900">
+          <div className="max-w-3xl mx-auto h-full ">
+            <div className="text-center mb-2 pb-14">
+              <h1 className="text-4xl font-bold text-purple-900">
                 Join Our Global Talent Network
               </h1>
-              <p className="text-gray-600 text-xs">
+              <p className="text-gray-600 text-smr pt-2">
                 Connect with opportunities that match your expertise
               </p>
             </div>
