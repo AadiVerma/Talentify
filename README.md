@@ -10,7 +10,6 @@
 4. [Screenshots](#screenshots)
 5. [Technology Stack](#technology-stack)
 6. [Contributing](#contributing)
-7. [License](#license)
 
 ## Project Overview
 
@@ -111,10 +110,5 @@ We welcome contributions from the community! Follow these steps to contribute:
    ```
 5. Open a Pull Request and describe your changes in detail.
 
-## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
-
----
-
-For any questions or support, feel free to contact us at [support@talentify.com](mailto:support@talentify.com).
+For any questions or support, feel free to contact us at [adityakaplish11@gmail.com](adityakaplish11@gmail.com).
